@@ -1,5 +1,11 @@
 export type AssetType = "gold" | "crypto" | "forex";
 
+export const ASSET_LABELS: Record<string, string> = {
+  gold: "Altın",
+  crypto: "Kripto",
+  forex: "Döviz",
+};
+
 export const CRYPTO_OPTIONS = [
   { id: "bitcoin", label: "Bitcoin (BTC)" },
   { id: "ethereum", label: "Ethereum (ETH)" },

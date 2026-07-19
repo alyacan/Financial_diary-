@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import PortfolioChart from "@/components/PortfolioChart";
 import TransactionTable from "@/components/TransactionTable";
-import { Transaction } from "@/lib/types";
+import { Transaction, ASSET_LABELS } from "@/lib/types";
 import { addTransaction, deleteTransaction, loadTransactions } from "@/lib/storage";
 import { fetchLivePrices, getManualGoldPrice, setManualGoldPrice } from "@/lib/prices";
 import { calculatePositions, calculateTransactionProfits, priceKey, PriceMap } from "@/lib/calculations";
@@ -58,8 +58,11 @@ export default function Home() {
   const positions = calculatePositions(transactions, prices);
   const rows = calculateTransactionProfits(transactions, prices);
   const totalInvested = positions.reduce((sum, p) => sum + p.totalInvested, 0);
-  const totalValue = positions.reduce((sum, p) => sum + p.currentValue, 0);
-  const totalProfit = totalValue - totalInvested;
+  const pricedPositions = positions.filter((p) => p.priceAvailable);
+  const totalValue = pricedPositions.reduce((sum, p) => sum + p.currentValue, 0);
+  const investedWithPrice = pricedPositions.reduce((sum, p) => sum + p.totalInvested, 0);
+  const totalProfit = totalValue - investedWithPrice;
+  const missingPricePositions = positions.filter((p) => !p.priceAvailable);
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
@@ -67,6 +70,14 @@ export default function Home() {
         <h1 className="text-2xl font-bold">Finansal Günlük</h1>
         <p className="text-sm text-zinc-500">Yatırım takibi ve otomatik kâr/zarar analizi</p>
       </header>
+
+      {missingPricePositions.length > 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          ⚠️ Şu varlıklar için güncel fiyat girilmedi, toplam hesaplamalara dahil edilmedi:{" "}
+          {missingPricePositions.map((p) => `${ASSET_LABELS[p.assetType] ?? p.assetType} (${p.subType})`).join(", ")}.
+          {" "}Altın için aşağıdaki "Güncel gram altın fiyatı" alanına fiyat girip kaydet.
+        </div>
+      )}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">

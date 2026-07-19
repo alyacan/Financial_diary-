@@ -2,13 +2,8 @@
 
 import { Fragment, useState } from "react";
 import { TransactionProfit } from "@/lib/calculations";
+import { ASSET_LABELS } from "@/lib/types";
 import HistoricalEventPanel from "./HistoricalEventPanel";
-
-const ASSET_LABELS: Record<string, string> = {
-  gold: "Altın",
-  crypto: "Kripto",
-  forex: "Döviz",
-};
 
 function formatTRY(value: number): string {
   return value.toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
@@ -43,20 +38,30 @@ export default function TransactionTable({ rows, onDelete }: Props) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ transaction, currentPrice, profit, profitPercent }) => (
+          {rows.map(({ transaction, currentPrice, profit, profitPercent, priceAvailable }) => (
             <Fragment key={transaction.id}>
               <tr className="border-b border-zinc-100 dark:border-zinc-900">
                 <td className="p-2">{transaction.date} {transaction.time}</td>
                 <td className="p-2">{ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})</td>
                 <td className="p-2">{transaction.quantity}</td>
                 <td className="p-2">{formatTRY(transaction.buyPrice)}</td>
-                <td className="p-2">{formatTRY(currentPrice)}</td>
-                <td className={`p-2 font-medium ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {profit >= 0 ? "🟢" : "🔴"} {formatTRY(profit)}
-                </td>
-                <td className={`p-2 ${profitPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {profitPercent.toFixed(2)}%
-                </td>
+                {!priceAvailable ? (
+                  <>
+                    <td className="p-2 text-zinc-400 italic" colSpan={3}>
+                      Güncel fiyat girilmedi
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="p-2">{formatTRY(currentPrice)}</td>
+                    <td className={`p-2 font-medium ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {profit >= 0 ? "🟢" : "🔴"} {formatTRY(profit)}
+                    </td>
+                    <td className={`p-2 ${profitPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {profitPercent.toFixed(2)}%
+                    </td>
+                  </>
+                )}
                 <td className="p-2 max-w-[160px] truncate" title={transaction.note}>{transaction.note}</td>
                 <td className="p-2 flex gap-2">
                   <button

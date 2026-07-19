@@ -2,14 +2,9 @@
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { PositionSummary } from "@/lib/calculations";
+import { ASSET_LABELS } from "@/lib/types";
 
 const COLORS = ["#eab308", "#f97316", "#3b82f6", "#22c55e", "#a855f7", "#ef4444"];
-
-const ASSET_LABELS: Record<string, string> = {
-  gold: "Altın",
-  crypto: "Kripto",
-  forex: "Döviz",
-};
 
 interface Props {
   positions: PositionSummary[];

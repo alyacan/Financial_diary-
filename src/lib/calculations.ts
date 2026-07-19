@@ -16,6 +16,7 @@ export interface PositionSummary {
   currentValue: number;
   totalProfit: number;
   profitPercent: number;
+  priceAvailable: boolean;
 }
 
 export interface TransactionProfit {
@@ -25,6 +26,7 @@ export interface TransactionProfit {
   cost: number;
   profit: number;
   profitPercent: number;
+  priceAvailable: boolean;
 }
 
 function transactionCost(t: Transaction): number {
@@ -47,6 +49,7 @@ export function calculatePositions(
     const totalInvested = txs.reduce((sum, t) => sum + transactionCost(t), 0);
     const averageCost = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
     const currentPrice = prices[key] ?? 0;
+    const priceAvailable = currentPrice > 0;
     const currentValue = totalQuantity * currentPrice;
     const totalProfit = currentValue - totalInvested;
     const profitPercent = totalInvested > 0 ? (totalProfit / totalInvested) * 100 : 0;
@@ -61,6 +64,7 @@ export function calculatePositions(
       currentValue,
       totalProfit,
       profitPercent,
+      priceAvailable,
     };
   });
 }
@@ -71,10 +75,11 @@ export function calculateTransactionProfits(
 ): TransactionProfit[] {
   return transactions.map((t) => {
     const currentPrice = prices[priceKey(t.assetType, t.subType)] ?? 0;
+    const priceAvailable = currentPrice > 0;
     const cost = transactionCost(t);
     const currentValue = t.quantity * currentPrice;
     const profit = currentValue - cost;
     const profitPercent = cost > 0 ? (profit / cost) * 100 : 0;
-    return { transaction: t, currentPrice, currentValue, cost, profit, profitPercent };
+    return { transaction: t, currentPrice, currentValue, cost, profit, profitPercent, priceAvailable };
   });
 }
