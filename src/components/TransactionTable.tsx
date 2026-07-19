@@ -9,6 +9,11 @@ function formatTRY(value: number): string {
   return value.toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
 }
 
+function formatDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split("-");
+  return `${d}.${m}.${y}`;
+}
+
 interface Props {
   rows: TransactionProfit[];
   onDelete: (id: string) => void;
@@ -33,15 +38,14 @@ export default function TransactionTable({ rows, onDelete }: Props) {
             <th className="p-2">Güncel</th>
             <th className="p-2">Kâr/Zarar</th>
             <th className="p-2">%</th>
-            <th className="p-2">Not</th>
             <th className="p-2">AI Analiz</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(({ transaction, currentPrice, profit, profitPercent, priceAvailable }) => (
             <Fragment key={transaction.id}>
-              <tr className="border-b border-zinc-100 dark:border-zinc-900">
-                <td className="p-2">{transaction.date} {transaction.time}</td>
+              <tr className={transaction.note ? "border-zinc-100 dark:border-zinc-900" : "border-b border-zinc-100 dark:border-zinc-900"}>
+                <td className="p-2 whitespace-nowrap">{formatDate(transaction.date)} {transaction.time}</td>
                 <td className="p-2">{ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})</td>
                 <td className="p-2">{transaction.quantity}</td>
                 <td className="p-2">{formatTRY(transaction.buyPrice)}</td>
@@ -62,7 +66,6 @@ export default function TransactionTable({ rows, onDelete }: Props) {
                     </td>
                   </>
                 )}
-                <td className="p-2 max-w-[160px] truncate" title={transaction.note}>{transaction.note}</td>
                 <td className="p-2">
                   <div className="flex gap-2 whitespace-nowrap">
                     <button
@@ -77,9 +80,16 @@ export default function TransactionTable({ rows, onDelete }: Props) {
                   </div>
                 </td>
               </tr>
+              {transaction.note && (
+                <tr className="border-b border-zinc-100 dark:border-zinc-900">
+                  <td colSpan={8} className="px-2 pb-2 text-zinc-600 dark:text-zinc-400">
+                    <span className="whitespace-pre-wrap">📝 {transaction.note}</span>
+                  </td>
+                </tr>
+              )}
               {expandedId === transaction.id && (
                 <tr>
-                  <td colSpan={9} className="p-2">
+                  <td colSpan={8} className="p-2">
                     <HistoricalEventPanel
                       date={transaction.date}
                       assetLabel={`${ASSET_LABELS[transaction.assetType] ?? transaction.assetType} (${transaction.subType})`}

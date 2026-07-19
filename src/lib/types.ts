@@ -48,3 +48,16 @@ export interface Expense {
   amount: number;
   note?: string;
 }
+
+export interface CalendarNote {
+  id: string;
+  date: string; // YYYY-MM-DD
+  text: string;
+}
+
+export const RECURRING_CALENDAR_INFO = [
+  "TCMB PPK (Para Politikası Kurulu) faiz kararı — genelde ayın ortasında, önceden ilan edilen bir Perşembe günü açıklanır.",
+  "TÜİK enflasyon (TÜFE) verisi — genelde her ayın ilk haftasında açıklanır.",
+  "FED (ABD Merkez Bankası) FOMC faiz kararı — yaklaşık 6 haftada bir toplanır.",
+  "Bilanço/kâr açıklama dönemleri — çeyrek sonlarını takip eden birkaç hafta içinde yoğunlaşır.",
+] as const;

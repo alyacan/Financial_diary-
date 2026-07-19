@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import PortfolioChart from "@/components/PortfolioChart";
 import TransactionTable from "@/components/TransactionTable";
+import FinancialJournal from "@/components/FinancialJournal";
+import FinancialCalendar from "@/components/FinancialCalendar";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
-import { Transaction, Expense, ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS } from "@/lib/types";
-import { addTransaction, deleteTransaction, loadTransactions, addExpense, deleteExpense, loadExpenses } from "@/lib/storage";
+import { Transaction, Expense, CalendarNote, ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS } from "@/lib/types";
+import { addTransaction, deleteTransaction, loadTransactions, addExpense, deleteExpense, loadExpenses, addCalendarNote, deleteCalendarNote, loadCalendarNotes } from "@/lib/storage";
 import { fetchLivePrices, getManualGoldPrice, setManualGoldPrice } from "@/lib/prices";
 import { calculatePositions, calculateTransactionProfits, priceKey, PriceMap } from "@/lib/calculations";
 
@@ -19,6 +21,7 @@ function formatTRY(value: number): string {
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [calendarNotes, setCalendarNotes] = useState<CalendarNote[]>([]);
   const [prices, setPrices] = useState<PriceMap>({});
   const [goldPriceInput, setGoldPriceInput] = useState("");
   const [loadingPrices, setLoadingPrices] = useState(false);
@@ -26,6 +29,7 @@ export default function Home() {
   useEffect(() => {
     setTransactions(loadTransactions());
     setExpenses(loadExpenses());
+    setCalendarNotes(loadCalendarNotes());
     const savedGold = getManualGoldPrice();
     if (savedGold) setGoldPriceInput(savedGold.toString());
   }, []);
@@ -59,6 +63,14 @@ export default function Home() {
 
   function handleDeleteExpense(id: string) {
     setExpenses(deleteExpense(id));
+  }
+
+  function handleAddCalendarNote(n: CalendarNote) {
+    setCalendarNotes(addCalendarNote(n));
+  }
+
+  function handleDeleteCalendarNote(id: string) {
+    setCalendarNotes(deleteCalendarNote(id));
   }
 
   function handleGoldPriceSave() {
@@ -154,6 +166,17 @@ export default function Home() {
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="mb-2 text-lg font-semibold">İşlemler</h2>
         <TransactionTable rows={rows} onDelete={handleDelete} />
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="mb-2 text-lg font-semibold">Finansal Takvim</h2>
+        <FinancialCalendar notes={calendarNotes} onAdd={handleAddCalendarNote} onDelete={handleDeleteCalendarNote} />
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="mb-2 text-lg font-semibold">Finans Günlüğü</h2>
+        <p className="mb-3 text-sm text-zinc-500">Yatırım kararlarının gerekçeleri, zaman akışı halinde.</p>
+        <FinancialJournal transactions={transactions} />
       </section>
 
       <header className="mt-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
