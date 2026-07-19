@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import PortfolioChart from "@/components/PortfolioChart";
 import TransactionTable from "@/components/TransactionTable";
-import { Transaction, ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS } from "@/lib/types";
-import { addTransaction, deleteTransaction, loadTransactions } from "@/lib/storage";
+import ExpenseForm from "@/components/ExpenseForm";
+import ExpenseChart from "@/components/ExpenseChart";
+import ExpenseTable from "@/components/ExpenseTable";
+import { Transaction, Expense, ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS } from "@/lib/types";
+import { addTransaction, deleteTransaction, loadTransactions, addExpense, deleteExpense, loadExpenses } from "@/lib/storage";
 import { fetchLivePrices, getManualGoldPrice, setManualGoldPrice } from "@/lib/prices";
 import { calculatePositions, calculateTransactionProfits, priceKey, PriceMap } from "@/lib/calculations";
 
@@ -15,12 +18,14 @@ function formatTRY(value: number): string {
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [prices, setPrices] = useState<PriceMap>({});
   const [goldPriceInput, setGoldPriceInput] = useState("");
   const [loadingPrices, setLoadingPrices] = useState(false);
 
   useEffect(() => {
     setTransactions(loadTransactions());
+    setExpenses(loadExpenses());
     const savedGold = getManualGoldPrice();
     if (savedGold) setGoldPriceInput(savedGold.toString());
   }, []);
@@ -48,6 +53,14 @@ export default function Home() {
     setTransactions(deleteTransaction(id));
   }
 
+  function handleAddExpense(e: Expense) {
+    setExpenses(addExpense(e));
+  }
+
+  function handleDeleteExpense(id: string) {
+    setExpenses(deleteExpense(id));
+  }
+
   function handleGoldPriceSave() {
     const value = parseFloat(goldPriceInput);
     if (!value) return;
@@ -63,6 +76,7 @@ export default function Home() {
   const investedWithPrice = pricedPositions.reduce((sum, p) => sum + p.totalInvested, 0);
   const totalProfit = totalValue - investedWithPrice;
   const missingPricePositions = positions.filter((p) => !p.priceAvailable);
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
@@ -140,6 +154,28 @@ export default function Home() {
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="mb-2 text-lg font-semibold">İşlemler</h2>
         <TransactionTable rows={rows} onDelete={handleDelete} />
+      </section>
+
+      <header className="mt-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <h1 className="text-2xl font-bold">Harcama Analizi</h1>
+        <p className="text-sm text-zinc-500">Kategori bazlı harcama takibi</p>
+      </header>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500">Toplam Harcama</p>
+        <p className="text-xl font-semibold">{formatTRY(totalExpenses)}</p>
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="mb-2 text-lg font-semibold">Kategori Dağılımı</h2>
+        <ExpenseChart expenses={expenses} />
+      </section>
+
+      <ExpenseForm onAdd={handleAddExpense} />
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="mb-2 text-lg font-semibold">Harcamalar</h2>
+        <ExpenseTable expenses={expenses} onDelete={handleDeleteExpense} />
       </section>
     </div>
   );

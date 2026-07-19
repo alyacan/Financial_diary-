@@ -27,3 +27,24 @@ export interface Transaction {
   commission?: number;
   note?: string;
 }
+
+export const EXPENSE_CATEGORIES = [
+  "Market",
+  "Yemek",
+  "Ulaşım",
+  "Eğlence",
+  "Spor",
+  "Eğitim",
+  "Kira",
+  "Faturalar",
+  "Sağlık",
+  "Diğer",
+] as const;
+
+export interface Expense {
+  id: string;
+  date: string; // YYYY-MM-DD
+  category: string;
+  amount: number;
+  note?: string;
+}
