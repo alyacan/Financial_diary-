@@ -1,9 +1,18 @@
-import { Transaction } from "./types";
+import { BALANCE_ONLY_TYPES, Transaction } from "./types";
 
 export type PriceMap = Record<string, number>; // key: `${assetType}:${subType}` -> current unit price TRY
 
 export function priceKey(assetType: string, subType: string): string {
   return `${assetType}:${subType}`;
+}
+
+// Banka/Vadeli Hesap/Mevduat/Nakit için kâr/zarar hesaplanmaz — bakiye kendi başına "fiyat" kabul edilir.
+function resolvePrice(assetType: string, key: string, prices: PriceMap): { currentPrice: number; priceAvailable: boolean } {
+  if (BALANCE_ONLY_TYPES.includes(assetType as Transaction["assetType"])) {
+    return { currentPrice: 1, priceAvailable: true };
+  }
+  const currentPrice = prices[key] ?? 0;
+  return { currentPrice, priceAvailable: currentPrice > 0 };
 }
 
 export interface PositionSummary {
@@ -48,8 +57,7 @@ export function calculatePositions(
     const totalQuantity = txs.reduce((sum, t) => sum + t.quantity, 0);
     const totalInvested = txs.reduce((sum, t) => sum + transactionCost(t), 0);
     const averageCost = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
-    const currentPrice = prices[key] ?? 0;
-    const priceAvailable = currentPrice > 0;
+    const { currentPrice, priceAvailable } = resolvePrice(assetType, key, prices);
     const currentValue = totalQuantity * currentPrice;
     const totalProfit = currentValue - totalInvested;
     const profitPercent = totalInvested > 0 ? (totalProfit / totalInvested) * 100 : 0;
@@ -74,8 +82,7 @@ export function calculateTransactionProfits(
   prices: PriceMap
 ): TransactionProfit[] {
   return transactions.map((t) => {
-    const currentPrice = prices[priceKey(t.assetType, t.subType)] ?? 0;
-    const priceAvailable = currentPrice > 0;
+    const { currentPrice, priceAvailable } = resolvePrice(t.assetType, priceKey(t.assetType, t.subType), prices);
     const cost = transactionCost(t);
     const currentValue = t.quantity * currentPrice;
     const profit = currentValue - cost;

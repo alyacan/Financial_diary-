@@ -1,4 +1,4 @@
-const GOLD_PRICE_KEY = "financial-diary-gold-price";
+const MANUAL_PRICES_KEY = "financial-diary-manual-prices";
 
 export async function fetchLivePrices(): Promise<Record<string, number>> {
   const res = await fetch("/api/prices");
@@ -6,13 +6,24 @@ export async function fetchLivePrices(): Promise<Record<string, number>> {
   return res.json();
 }
 
-export function getManualGoldPrice(): number {
-  if (typeof window === "undefined") return 0;
-  const raw = window.localStorage.getItem(GOLD_PRICE_KEY);
-  return raw ? parseFloat(raw) : 0;
+function loadManualPrices(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+  const raw = window.localStorage.getItem(MANUAL_PRICES_KEY);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Record<string, number>;
+  } catch {
+    return {};
+  }
 }
 
-export function setManualGoldPrice(price: number): void {
+export function getManualPrice(key: string): number {
+  return loadManualPrices()[key] ?? 0;
+}
+
+export function setManualPrice(key: string, price: number): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(GOLD_PRICE_KEY, price.toString());
+  const prices = loadManualPrices();
+  prices[key] = price;
+  window.localStorage.setItem(MANUAL_PRICES_KEY, JSON.stringify(prices));
 }

@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 import { TransactionProfit } from "@/lib/calculations";
-import { ASSET_LABELS } from "@/lib/types";
+import { ASSET_LABELS, BALANCE_ONLY_TYPES } from "@/lib/types";
 import HistoricalEventPanel from "./HistoricalEventPanel";
 
 function formatTRY(value: number): string {
@@ -47,23 +47,31 @@ export default function TransactionTable({ rows, onDelete }: Props) {
               <tr className={transaction.note ? "border-zinc-100 dark:border-zinc-900" : "border-b border-zinc-100 dark:border-zinc-900"}>
                 <td className="p-2 whitespace-nowrap">{formatDate(transaction.date)} {transaction.time}</td>
                 <td className="p-2">{ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})</td>
-                <td className="p-2">{transaction.quantity}</td>
-                <td className="p-2">{formatTRY(transaction.buyPrice)}</td>
-                {!priceAvailable ? (
+                {BALANCE_ONLY_TYPES.includes(transaction.assetType) ? (
                   <>
-                    <td className="p-2 text-zinc-400 italic" colSpan={3}>
-                      Güncel fiyat girilmedi
-                    </td>
+                    <td className="p-2 text-zinc-400">—</td>
+                    <td className="p-2">{formatTRY(transaction.quantity)}</td>
+                    <td className="p-2 text-zinc-400 italic" colSpan={3}>Bakiye (kâr/zarar hesaplanmaz)</td>
                   </>
                 ) : (
                   <>
-                    <td className="p-2">{formatTRY(currentPrice)}</td>
-                    <td className={`p-2 font-medium ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
-                      {profit >= 0 ? "🟢" : "🔴"} {formatTRY(profit)}
-                    </td>
-                    <td className={`p-2 ${profitPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
-                      {profitPercent.toFixed(2)}%
-                    </td>
+                    <td className="p-2">{transaction.quantity}</td>
+                    <td className="p-2">{formatTRY(transaction.buyPrice)}</td>
+                    {!priceAvailable ? (
+                      <td className="p-2 text-zinc-400 italic" colSpan={3}>
+                        Güncel fiyat girilmedi
+                      </td>
+                    ) : (
+                      <>
+                        <td className="p-2">{formatTRY(currentPrice)}</td>
+                        <td className={`p-2 font-medium ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          {profit >= 0 ? "🟢" : "🔴"} {formatTRY(profit)}
+                        </td>
+                        <td className={`p-2 ${profitPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          {profitPercent.toFixed(2)}%
+                        </td>
+                      </>
+                    )}
                   </>
                 )}
                 <td className="p-2">

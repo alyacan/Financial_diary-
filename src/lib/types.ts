@@ -1,10 +1,28 @@
-export type AssetType = "gold" | "crypto" | "forex";
+export type AssetType =
+  | "gold"
+  | "crypto"
+  | "forex"
+  | "fund"
+  | "stock"
+  | "bank"
+  | "time_deposit"
+  | "deposit"
+  | "cash";
 
 export const ASSET_LABELS: Record<string, string> = {
   gold: "Altın",
   crypto: "Kripto",
   forex: "Döviz",
+  fund: "Fon",
+  stock: "Hisse",
+  bank: "Banka",
+  time_deposit: "Vadeli Hesap",
+  deposit: "Mevduat",
+  cash: "Nakit",
 };
+
+// Bunlar için kâr/zarar hesaplanmaz — sadece bakiye olarak portföye eklenir.
+export const BALANCE_ONLY_TYPES: AssetType[] = ["bank", "time_deposit", "deposit", "cash"];
 
 export const CRYPTO_OPTIONS = [
   { id: "bitcoin", label: "Bitcoin (BTC)" },
@@ -14,6 +32,26 @@ export const CRYPTO_OPTIONS = [
 export const FOREX_OPTIONS = [
   { code: "USD", label: "Amerikan Doları (USD)" },
   { code: "EUR", label: "Euro (EUR)" },
+] as const;
+
+export const GOLD_SUBTYPES = [
+  { id: "gram", label: "Gram Altın" },
+  { id: "ceyrek", label: "Çeyrek Altın" },
+  { id: "cumhuriyet", label: "Cumhuriyet Altını" },
+] as const;
+
+export const FUND_CATEGORIES = [
+  "Teknoloji Ağırlıklı",
+  "Yabancı Hisse Ağırlıklı",
+  "BIST 100",
+  "BIST 30 Dışı Hisse Senedi Yoğun",
+  "Bankacılık",
+  "Yarı İletkenler",
+  "Gayrimenkul",
+  "Temiz Enerji",
+  "Sağlık Hizmetleri",
+  "Likit Fon",
+  "Diğer",
 ] as const;
 
 export interface Transaction {
