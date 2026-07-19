@@ -249,7 +249,7 @@ export default function Home() {
         <ExpenseChart expenses={expenses} />
       </section>
 
-      <StatementUpload onImport={handleImportExpenses} />
+      <StatementUpload existingExpenses={expenses} onImport={handleImportExpenses} />
 
       <ExpenseForm onAdd={handleAddExpense} />
 

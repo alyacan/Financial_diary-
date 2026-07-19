@@ -9,6 +9,7 @@ interface ParsedRow {
   amount: number;
   category: string;
   include: boolean;
+  isDuplicate: boolean;
 }
 
 function formatTRY(value: number): string {
@@ -16,10 +17,11 @@ function formatTRY(value: number): string {
 }
 
 interface Props {
+  existingExpenses: Expense[];
   onImport: (expenses: Expense[]) => void;
 }
 
-export default function StatementUpload({ onImport }: Props) {
+export default function StatementUpload({ existingExpenses, onImport }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [rows, setRows] = useState<ParsedRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,8 +41,20 @@ export default function StatementUpload({ onImport }: Props) {
       const res = await fetch("/api/parse-statement", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Ekstre işlenemedi");
-      setRows(data.rows.map((r: Omit<ParsedRow, "include">) => ({ ...r, include: true })));
-      if (data.warning) setWarning(data.warning);
+
+      const existingKeys = new Set(existingExpenses.map((e) => `${e.date}|${e.amount}|${e.note ?? ""}`));
+      const parsedRows: ParsedRow[] = data.rows.map((r: Omit<ParsedRow, "include" | "isDuplicate">) => {
+        const isDuplicate = existingKeys.has(`${r.date}|${r.amount}|${r.description}`);
+        return { ...r, include: !isDuplicate, isDuplicate };
+      });
+      setRows(parsedRows);
+      const duplicateCount = parsedRows.filter((r) => r.isDuplicate).length;
+      if (duplicateCount > 0) {
+        setWarning(
+          `${duplicateCount} işlem daha önce içe aktarılmış görünüyor (aynı tarih/tutar/açıklama) — tekrar eklenmesin diye işaretleri otomatik kaldırıldı, istersen elle işaretleyip yine de ekleyebilirsin.`
+        );
+      }
+      if (data.warning) setWarning((prev) => (prev ? `${prev} ${data.warning}` : data.warning));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Bir hata oluştu");
     }
@@ -109,12 +123,15 @@ export default function StatementUpload({ onImport }: Props) {
               </thead>
               <tbody>
                 {rows.map((r, i) => (
-                  <tr key={i} className="border-b border-zinc-100 dark:border-zinc-900">
+                  <tr key={i} className={`border-b border-zinc-100 dark:border-zinc-900 ${r.isDuplicate ? "opacity-50" : ""}`}>
                     <td className="p-2">
                       <input type="checkbox" checked={r.include} onChange={(e) => updateRow(i, { include: e.target.checked })} />
                     </td>
                     <td className="p-2 whitespace-nowrap">{r.date.split("-").reverse().join(".")}</td>
-                    <td className="p-2 max-w-[220px] truncate" title={r.description}>{r.description}</td>
+                    <td className="p-2 max-w-[220px] truncate" title={r.description}>
+                      {r.description}
+                      {r.isDuplicate && <span className="ml-1 text-xs text-amber-600">(tekrar?)</span>}
+                    </td>
                     <td className="p-2 whitespace-nowrap">{formatTRY(r.amount)}</td>
                     <td className="p-2">
                       <select
