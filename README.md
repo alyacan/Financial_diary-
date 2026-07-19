@@ -16,6 +16,7 @@ Yatırımlarını (altın, kripto, döviz) tek ekranda takip eden, otomatik kâr
 - **Harcama Analizi**: Kategori bazlı (Market, Yemek, Ulaşım, Eğlence, Spor, Eğitim, Kira, Faturalar, Sağlık, Diğer) manuel harcama girişi, toplam harcama özeti, kategori dağılım pasta grafiği.
 - **Finans Günlüğü**: Yatırım işlemlerine eklenen notların ayrı bir ajanda/zaman akışı görünümü — kararların gerekçesini geriye dönük okumak için.
 - **Finansal Takvim**: Spesifik (muhtemelen yanlış) tarih uydurmak yerine, düzenli tekrar eden ekonomik olaylar hakkında genel bilgi + kullanıcının kendi bildiği resmi/ilan edilmiş tarihleri manuel ekleyebileceği bir alan.
+- **Hesap Ekstresi Yükleme**: Kredi kartı/banka ekstresini PDF olarak yükle, işlemler otomatik ayrıştırılır (pdf-parse) ve Gemini ile kategorize edilir; içe aktarmadan önce kategoriler düzenlenebilir/işlemler hariç tutulabilir. Sadece pozitif tutarlı (gerçek harcama) satırlar işlenir — ödeme/aktarım/iade satırları hariç tutulur. Şu an İş Bankası Maximum kredi kartı ekstresi formatı üzerinde test edilmiştir; farklı banka formatları için ayrıştırıcı güncellenmesi gerekebilir.
 - Veriler tarayıcıda (localStorage) saklanır — sunucu tarafı veritabanı yok.
 
 ## Kullanılan Teknolojiler ve AI Araçları
@@ -26,6 +27,7 @@ Yatırımlarını (altın, kripto, döviz) tek ekranda takip eden, otomatik kâr
 - **CoinGecko API** — kripto fiyatları (ücretsiz, key gerektirmez)
 - **Frankfurter API** — döviz kurları (ücretsiz, key gerektirmez)
 - **Yahoo Finance (gayriresmi endpoint)** — ons altın vadeli işlem fiyatı (ücretsiz, key gerektirmez)
+- **pdf-parse** — PDF ekstre metin çıkarımı
 - **Claude Code** — geliştirme sürecinde AI destekli kodlama asistanı
 
 ## Kurulum
@@ -51,7 +53,8 @@ http://localhost:3000 adresinden açın.
 Bu bölümdeki özellikler projenin uzun vadeli hedefidir, MVP kapsamında değildir:
 
 - Fon/Hisse için canlı veya manuel güncel fiyat girişi (TEFAS kodu, yıllık getiri, risk seviyesi)
-- Hedef bazlı bütçe (kategori başına aylık hedef ve geçen aya göre karşılaştırma), banka ekstresi (PDF/CSV/Excel) yükleme ve AI ile otomatik kategorizasyon, çoklu banka desteği
+- Hedef bazlı bütçe (kategori başına aylık hedef ve geçen aya göre karşılaştırma)
+- Çoklu banka/format desteği için ekstre ayrıştırıcının genelleştirilmesi (CSV/Excel dahil)
 - Finansal kimlik anketi (yaş, meslek, gelir, risk seviyesi) ve kişiselleştirilmiş AI profili
 - Aylık AI raporu (PDF/metin dışa aktarım, kullanıcının kendi AI hesabına yükleyebilmesi)
 - İşlem hariç tutma + AI'nin tekrarlayan işlemleri öğrenip otomatik filtreleme önerisi
