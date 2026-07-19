@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import PortfolioChart from "@/components/PortfolioChart";
 import TransactionTable from "@/components/TransactionTable";
-import { Transaction, ASSET_LABELS } from "@/lib/types";
+import { Transaction, ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS } from "@/lib/types";
 import { addTransaction, deleteTransaction, loadTransactions } from "@/lib/storage";
 import { fetchLivePrices, getManualGoldPrice, setManualGoldPrice } from "@/lib/prices";
 import { calculatePositions, calculateTransactionProfits, priceKey, PriceMap } from "@/lib/calculations";
@@ -75,7 +75,7 @@ export default function Home() {
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           ⚠️ Şu varlıklar için güncel fiyat girilmedi, toplam hesaplamalara dahil edilmedi:{" "}
           {missingPricePositions.map((p) => `${ASSET_LABELS[p.assetType] ?? p.assetType} (${p.subType})`).join(", ")}.
-          {" "}Altın için aşağıdaki "Güncel gram altın fiyatı" alanına fiyat girip kaydet.
+          {" "}Altın için aşağıdaki "Güncel Fiziki Altın Alım Bedeli" alanına fiyat girip kaydet.
         </div>
       )}
 
@@ -96,23 +96,38 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
-        <label className="flex items-center gap-2 text-sm">
-          Güncel gram altın fiyatı (TL):
-          <input
-            type="number"
-            step="any"
-            value={goldPriceInput}
-            onChange={(e) => setGoldPriceInput(e.target.value)}
-            className="w-32 rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
-          />
-          <button onClick={handleGoldPriceSave} className="rounded bg-zinc-900 px-3 py-1 text-white dark:bg-zinc-100 dark:text-black">
-            Kaydet
+      <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <label className="flex items-center gap-2 text-sm">
+            Güncel Fiziki Altın Alım Bedeli (gram, TL):
+            <input
+              type="number"
+              step="any"
+              value={goldPriceInput}
+              onChange={(e) => setGoldPriceInput(e.target.value)}
+              className="w-32 rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
+            />
+            <button onClick={handleGoldPriceSave} className="rounded bg-zinc-900 px-3 py-1 text-white dark:bg-zinc-100 dark:text-black">
+              Kaydet
+            </button>
+          </label>
+          <button onClick={refreshPrices} disabled={loadingPrices} className="text-sm text-zinc-500 hover:underline">
+            {loadingPrices ? "Fiyatlar güncelleniyor..." : "Kripto/döviz fiyatlarını yenile"}
           </button>
-        </label>
-        <button onClick={refreshPrices} disabled={loadingPrices} className="text-sm text-zinc-500 hover:underline">
-          {loadingPrices ? "Fiyatlar güncelleniyor..." : "Kripto/döviz fiyatlarını yenile"}
-        </button>
+        </div>
+
+        <div className="flex flex-wrap gap-4 border-t border-zinc-100 pt-3 text-sm dark:border-zinc-900">
+          {CRYPTO_OPTIONS.map((c) => (
+            <span key={c.id}>
+              {c.label}: <strong>{formatTRY(prices[priceKey("crypto", c.id)] ?? 0)}</strong>
+            </span>
+          ))}
+          {FOREX_OPTIONS.map((c) => (
+            <span key={c.code}>
+              {c.label}: <strong>{formatTRY(prices[priceKey("forex", c.code)] ?? 0)}</strong>
+            </span>
+          ))}
+        </div>
       </section>
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">

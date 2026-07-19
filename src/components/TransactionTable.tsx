@@ -34,7 +34,7 @@ export default function TransactionTable({ rows, onDelete }: Props) {
             <th className="p-2">Kâr/Zarar</th>
             <th className="p-2">%</th>
             <th className="p-2">Not</th>
-            <th className="p-2"></th>
+            <th className="p-2">AI Analiz</th>
           </tr>
         </thead>
         <tbody>
@@ -63,16 +63,18 @@ export default function TransactionTable({ rows, onDelete }: Props) {
                   </>
                 )}
                 <td className="p-2 max-w-[160px] truncate" title={transaction.note}>{transaction.note}</td>
-                <td className="p-2 flex gap-2">
-                  <button
-                    onClick={() => setExpandedId(expandedId === transaction.id ? null : transaction.id)}
-                    className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-                  >
-                    {expandedId === transaction.id ? "Kapat" : "🕐"}
-                  </button>
-                  <button onClick={() => onDelete(transaction.id)} className="text-zinc-400 hover:text-red-600">
-                    Sil
-                  </button>
+                <td className="p-2">
+                  <div className="flex gap-2 whitespace-nowrap">
+                    <button
+                      onClick={() => setExpandedId(expandedId === transaction.id ? null : transaction.id)}
+                      className="text-zinc-600 underline hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                    >
+                      {expandedId === transaction.id ? "Kapat ▲" : "🕐 Tarihsel Bağlam"}
+                    </button>
+                    <button onClick={() => onDelete(transaction.id)} className="text-zinc-400 hover:text-red-600">
+                      Sil
+                    </button>
+                  </div>
                 </td>
               </tr>
               {expandedId === transaction.id && (

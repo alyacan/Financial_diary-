@@ -22,6 +22,8 @@ export default function PortfolioChart({ positions }: Props) {
     return <p className="text-sm text-zinc-500">Henüz görüntülenecek pozisyon yok.</p>;
   }
 
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
@@ -31,7 +33,13 @@ export default function PortfolioChart({ positions }: Props) {
           ))}
         </Pie>
         <Tooltip formatter={(value) => Number(value).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })} />
-        <Legend />
+        <Legend
+          formatter={(value) => {
+            const entry = data.find((d) => d.name === value);
+            const percent = entry ? ((entry.value / total) * 100).toFixed(1) : "0";
+            return `${value} — %${percent}`;
+          }}
+        />
       </PieChart>
     </ResponsiveContainer>
   );
