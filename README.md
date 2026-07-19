@@ -14,6 +14,8 @@ Yatırımlarını (altın, kripto, döviz) tek ekranda takip eden, otomatik kâr
 - **Portföy dağılım grafiği**: Varlık türüne göre pasta grafik.
 - **AI destekli tarihsel olay analizi**: Her işlem için, o tarihteki önemli ekonomik/siyasi gelişmelerin kısa özeti; istenirse Gemini ile IMRaD formatında + SWOT analizi içeren detaylı rapora genişletilebilir. Model gerçek zamanlı internete erişemediği için yalnızca eğitim verisindeki bilgiye dayanır ve emin olmadığı durumları açıkça belirtir (uydurma kaynak vermez). **Bilinen sınır:** Model kendi eğitim verisi kapsamına çok yakın veya sonraki tarihler için ("bu ay yaptığım işlem gibi") dürüstçe bilgisi olmadığını söyler — bu bir hata değil, kasıtlı bir güvenlik davranışıdır. (Google Arama ile gerçek zamanlı erişim teknik olarak mümkün ama ücretsiz key'lerde kota dışı; faturalandırma açılırsa etkinleştirilebilir.)
 - **Harcama Analizi**: Kategori bazlı (Market, Yemek, Ulaşım, Eğlence, Spor, Eğitim, Kira, Faturalar, Sağlık, Diğer) manuel harcama girişi, toplam harcama özeti, kategori dağılım pasta grafiği.
+- **Finans Günlüğü**: Yatırım işlemlerine eklenen notların ayrı bir ajanda/zaman akışı görünümü — kararların gerekçesini geriye dönük okumak için.
+- **Finansal Takvim**: Spesifik (muhtemelen yanlış) tarih uydurmak yerine, düzenli tekrar eden ekonomik olaylar hakkında genel bilgi + kullanıcının kendi bildiği resmi/ilan edilmiş tarihleri manuel ekleyebileceği bir alan.
 - Veriler tarayıcıda (localStorage) saklanır — sunucu tarafı veritabanı yok.
 
 ## Kullanılan Teknolojiler ve AI Araçları
@@ -49,9 +51,7 @@ Bu bölümdeki özellikler projenin uzun vadeli hedefidir, MVP kapsamında deği
 
 - Fon (TEFAS), hisse senedi, vadeli hesap, mevduat varlık türleri ve alt gruplandırmalar
 - Hedef bazlı bütçe (kategori başına aylık hedef ve geçen aya göre karşılaştırma), banka ekstresi (PDF/CSV/Excel) yükleme ve AI ile otomatik kategorizasyon, çoklu banka desteği
-- Finans günlüğü (işlem notlarının ayrı bir zaman akışında gösterimi)
 - Finansal kimlik anketi (yaş, meslek, gelir, risk seviyesi) ve kişiselleştirilmiş AI profili
 - Aylık AI raporu (PDF/metin dışa aktarım, kullanıcının kendi AI hesabına yükleyebilmesi)
 - İşlem hariç tutma + AI'nin tekrarlayan işlemleri öğrenip otomatik filtreleme önerisi
-- Finansal takvim (yaklaşan ekonomik olaylar)
 - Web arayüzü içi sınırlı görevli AI asistanı (rapor ve tarihsel olay anlatımı + arayüz etkileşimi)
