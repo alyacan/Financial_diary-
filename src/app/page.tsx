@@ -9,8 +9,9 @@ import FinancialCalendar from "@/components/FinancialCalendar";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
+import StatementUpload from "@/components/StatementUpload";
 import { Transaction, Expense, CalendarNote, ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS, GOLD_SUBTYPES } from "@/lib/types";
-import { addTransaction, deleteTransaction, loadTransactions, addExpense, deleteExpense, loadExpenses, addCalendarNote, deleteCalendarNote, loadCalendarNotes } from "@/lib/storage";
+import { addTransaction, deleteTransaction, loadTransactions, addExpense, addExpenses, deleteExpense, loadExpenses, addCalendarNote, deleteCalendarNote, loadCalendarNotes } from "@/lib/storage";
 import { fetchLivePrices, getManualPrice, setManualPrice } from "@/lib/prices";
 import { calculatePositions, calculateTransactionProfits, priceKey, PriceMap } from "@/lib/calculations";
 
@@ -79,6 +80,10 @@ export default function Home() {
 
   function handleDeleteExpense(id: string) {
     setExpenses(deleteExpense(id));
+  }
+
+  function handleImportExpenses(newExpenses: Expense[]) {
+    setExpenses(addExpenses(newExpenses));
   }
 
   function handleAddCalendarNote(n: CalendarNote) {
@@ -243,6 +248,8 @@ export default function Home() {
         <h2 className="mb-2 text-lg font-semibold">Kategori Dağılımı</h2>
         <ExpenseChart expenses={expenses} />
       </section>
+
+      <StatementUpload onImport={handleImportExpenses} />
 
       <ExpenseForm onAdd={handleAddExpense} />
 

@@ -60,6 +60,12 @@ export function deleteExpense(id: string): Expense[] {
   return expenses;
 }
 
+export function addExpenses(newExpenses: Expense[]): Expense[] {
+  const expenses = [...loadExpenses(), ...newExpenses];
+  saveExpenses(expenses);
+  return expenses;
+}
+
 export function loadCalendarNotes(): CalendarNote[] {
   if (typeof window === "undefined") return [];
   const raw = window.localStorage.getItem(CALENDAR_STORAGE_KEY);
