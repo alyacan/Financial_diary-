@@ -12,7 +12,7 @@ Yatırımlarını (altın, kripto, döviz) tek ekranda takip eden, otomatik kâr
 - **Otomatik kâr/zarar hesaplama**: Ortalama maliyet, toplam yatırım, güncel değer, işlem bazlı ve toplam kâr/zarar (yüzde dahil).
 - **Canlı fiyatlar**: Kripto (CoinGecko) ve döviz (Frankfurter) fiyatları otomatik çekilir; altın için güncel fiyat manuel girilir (ücretsiz canlı API bulunmadığından).
 - **Portföy dağılım grafiği**: Varlık türüne göre pasta grafik.
-- **AI destekli tarihsel olay analizi**: Her işlem için, o tarihteki önemli ekonomik/siyasi gelişmelerin kısa özeti; istenirse Gemini ile IMRaD formatında + SWOT analizi içeren detaylı rapora genişletilebilir. Model gerçek zamanlı internete erişemediği için yalnızca genel bilinen/doğrulanabilir bilgiye dayanır ve emin olmadığı durumları açıkça belirtir (uydurma kaynak vermez).
+- **AI destekli tarihsel olay analizi**: Her işlem için, o tarihteki önemli ekonomik/siyasi gelişmelerin kısa özeti; istenirse Gemini ile IMRaD formatında + SWOT analizi içeren detaylı rapora genişletilebilir. Model gerçek zamanlı internete erişemediği için yalnızca eğitim verisindeki bilgiye dayanır ve emin olmadığı durumları açıkça belirtir (uydurma kaynak vermez). **Bilinen sınır:** Model kendi eğitim verisi kapsamına çok yakın veya sonraki tarihler için ("bu ay yaptığım işlem gibi") dürüstçe bilgisi olmadığını söyler — bu bir hata değil, kasıtlı bir güvenlik davranışıdır. (Google Arama ile gerçek zamanlı erişim teknik olarak mümkün ama ücretsiz key'lerde kota dışı; faturalandırma açılırsa etkinleştirilebilir.)
 - Veriler tarayıcıda (localStorage) saklanır — sunucu tarafı veritabanı yok.
 
 ## Kullanılan Teknolojiler ve AI Araçları
