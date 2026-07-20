@@ -21,7 +21,7 @@ export async function GET() {
   await Promise.all(
     FOREX_OPTIONS.map(async (c) => {
       try {
-        const res = await fetch(`https://api.frankfurter.app/latest?from=${c.code}&to=TRY`);
+        const res = await fetch(`https://api.frankfurter.dev/v1/latest?from=${c.code}&to=TRY`);
         const data = await res.json();
         prices[priceKey("forex", c.code)] = data.rates?.TRY ?? 0;
       } catch {
