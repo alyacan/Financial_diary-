@@ -27,6 +27,7 @@ export default function TransactionForm({ onAdd }: Props) {
   const [assetType, setAssetType] = useState<AssetType>("gold");
   const [subType, setSubType] = useState<string>(GOLD_SUBTYPES[0].id);
   const [fundCustomName, setFundCustomName] = useState("");
+  const [fundCode, setFundCode] = useState("");
   const [date, setDate] = useState("");
   const [quantity, setQuantity] = useState("");
   const [buyPrice, setBuyPrice] = useState("");
@@ -72,6 +73,7 @@ export default function TransactionForm({ onAdd }: Props) {
         date,
         quantity: parseFloat(quantity),
         buyPrice: parseFloat(buyPrice),
+        fundCode: assetType === "fund" && fundCode ? fundCode : undefined,
         note: note || undefined,
       });
       setQuantity("");
@@ -81,6 +83,7 @@ export default function TransactionForm({ onAdd }: Props) {
     setDate("");
     setNote("");
     setFundCustomName("");
+    setFundCode("");
   }
 
   return (
@@ -162,6 +165,12 @@ export default function TransactionForm({ onAdd }: Props) {
                   className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
               </label>
             )}
+            <label className="flex flex-col gap-1 text-sm">
+              Fon Kodu (TEFAS, opsiyonel)
+              <input type="text" value={fundCode} onChange={(e) => setFundCode(e.target.value)}
+                placeholder="Örn: AFA"
+                className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
+            </label>
           </>
         )}
 

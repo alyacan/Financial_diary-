@@ -62,7 +62,12 @@ export interface Transaction {
   date: string; // YYYY-MM-DD
   quantity: number; // gram / adet / birim
   buyPrice: number; // TL per unit
+  fundCode?: string; // sadece assetType "fund" için: TEFAS fon kodu (örn. AFA)
   note?: string;
+}
+
+export function tefasUrl(fundCode: string): string {
+  return `https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod=${encodeURIComponent(fundCode.toUpperCase())}`;
 }
 
 export const EXPENSE_CATEGORIES = [

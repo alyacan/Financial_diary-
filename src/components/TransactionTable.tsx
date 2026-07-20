@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 import { TransactionProfit } from "@/lib/calculations";
-import { ASSET_LABELS, BALANCE_ONLY_TYPES } from "@/lib/types";
+import { ASSET_LABELS, BALANCE_ONLY_TYPES, tefasUrl } from "@/lib/types";
 import HistoricalEventPanel from "./HistoricalEventPanel";
 
 function formatTRY(value: number): string {
@@ -46,7 +46,22 @@ export default function TransactionTable({ rows, onDelete }: Props) {
             <Fragment key={transaction.id}>
               <tr className={transaction.note ? "border-zinc-100 dark:border-zinc-900" : "border-b border-zinc-100 dark:border-zinc-900"}>
                 <td className="p-2 whitespace-nowrap">{formatDate(transaction.date)}</td>
-                <td className="p-2">{ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})</td>
+                <td className="p-2">
+                  {ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})
+                  {transaction.fundCode && (
+                    <>
+                      {" "}
+                      <a
+                        href={tefasUrl(transaction.fundCode)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-500 underline hover:text-zinc-900 dark:hover:text-zinc-100"
+                      >
+                        TEFAS ↗
+                      </a>
+                    </>
+                  )}
+                </td>
                 {BALANCE_ONLY_TYPES.includes(transaction.assetType) ? (
                   <>
                     <td className="p-2 text-zinc-400">—</td>
