@@ -58,11 +58,14 @@ export const FUND_CATEGORIES = [
 export interface Transaction {
   id: string;
   assetType: AssetType;
-  subType: string; // gold: "gram" | crypto coin id | forex currency code
+  // gold: "gram"|"ceyrek"|"cumhuriyet" | crypto coin id | forex currency code |
+  // fund: TEFAS fon kodu (fiyatlandırma anahtarı budur, bkz. calculations.ts)
+  subType: string;
   date: string; // YYYY-MM-DD
   quantity: number; // gram / adet / birim
   buyPrice: number; // TL per unit
-  fundCode?: string; // sadece assetType "fund" için: TEFAS fon kodu (örn. AFA)
+  fundCode?: string; // sadece assetType "fund" için: subType ile aynı değer, TEFAS linki için
+  fundCategory?: string; // sadece assetType "fund" için: görüntüleme amaçlı kategori (fiyatlandırmayı etkilemez)
   note?: string;
 }
 

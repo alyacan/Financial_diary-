@@ -4,7 +4,7 @@ import TransactionForm from "@/components/TransactionForm";
 import PortfolioChart from "@/components/PortfolioChart";
 import TransactionTable from "@/components/TransactionTable";
 import { useInvestments, MANUAL_GOLD_SUBTYPES } from "@/hooks/useInvestments";
-import { ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS } from "@/lib/types";
+import { ASSET_LABELS, CRYPTO_OPTIONS, FOREX_OPTIONS, tefasUrl } from "@/lib/types";
 import { priceKey } from "@/lib/calculations";
 
 function formatTRY(value: number): string {
@@ -16,18 +16,22 @@ export default function YatirimlarPage() {
     prices,
     manualGoldInputs,
     setManualGoldInputs,
+    manualFundInputs,
+    setManualFundInputs,
+    distinctFundCodes,
     loadingPrices,
     refreshPrices,
     handleAdd,
     handleDelete,
     handleManualGoldSave,
+    handleManualFundSave,
     positions,
     rows,
     totalInvested,
     totalValue,
     totalProfit,
     missingPricePositions,
-    fundPositions,
+    fundCategoryBreakdown,
     totalFundInvested,
   } = useInvestments();
 
@@ -42,7 +46,7 @@ export default function YatirimlarPage() {
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           ⚠️ Şu varlıklar için güncel fiyat girilmedi, toplam hesaplamalara dahil edilmedi:{" "}
           {missingPricePositions.map((p) => `${ASSET_LABELS[p.assetType] ?? p.assetType} (${p.subType})`).join(", ")}.
-          {" "}Çeyrek/Cumhuriyet altın için aşağıdaki alana, fon/hisse için ise henüz otomatik/manuel fiyat girişi bulunmuyor.
+          {" "}Çeyrek/Cumhuriyet altın ve Fon için aşağıdaki alanlara güncel fiyat girebilirsin; Hisse için henüz fiyat girişi yok.
         </div>
       )}
 
@@ -107,6 +111,34 @@ export default function YatirimlarPage() {
             </label>
           ))}
         </div>
+
+        {distinctFundCodes.length > 0 && (
+          <div className="flex flex-col gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-900">
+            <p className="text-xs text-zinc-400">
+              Fon fiyatları TEFAS&apos;ın bot korumasından dolayı otomatik çekilemiyor — linke tıklayıp gerçek güncel fiyatı gördükten sonra elle gir.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              {distinctFundCodes.map((code) => (
+                <label key={code} className="flex items-center gap-2 text-sm">
+                  <a href={tefasUrl(code)} target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-900 dark:hover:text-zinc-100">
+                    {code} ↗
+                  </a>
+                  Güncel Fiyat (TL):
+                  <input
+                    type="number"
+                    step="any"
+                    value={manualFundInputs[code] ?? ""}
+                    onChange={(e) => setManualFundInputs((prev) => ({ ...prev, [code]: e.target.value }))}
+                    className="w-28 rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
+                  />
+                  <button onClick={() => handleManualFundSave(code)} className="rounded bg-zinc-900 px-3 py-1 text-white dark:bg-zinc-100 dark:text-black">
+                    Kaydet
+                  </button>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -114,19 +146,19 @@ export default function YatirimlarPage() {
         <PortfolioChart positions={positions} />
       </section>
 
-      {fundPositions.length > 0 && (
+      {fundCategoryBreakdown.length > 0 && (
         <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-          <h2 className="mb-2 text-lg font-semibold">Fon Dağılımı</h2>
+          <h2 className="mb-2 text-lg font-semibold">Fon Dağılımı (Kategoriye Göre)</h2>
           <p className="mb-3 text-sm text-zinc-500">
-            Fonlar için henüz canlı/manuel güncel fiyat girişi yok — bu yüzden yatırılan tutara göre dağılım gösteriliyor (kâr/zarar değil).
+            Yatırılan tutara göre kategori dağılımı (kâr/zarar için yukarıdaki fon bazlı güncel fiyat girişini kullan).
           </p>
           <ul className="flex flex-col gap-2">
-            {fundPositions.map((p) => {
-              const percent = totalFundInvested > 0 ? (p.totalInvested / totalFundInvested) * 100 : 0;
+            {fundCategoryBreakdown.map((f) => {
+              const percent = totalFundInvested > 0 ? (f.totalInvested / totalFundInvested) * 100 : 0;
               return (
-                <li key={p.subType} className="flex items-center justify-between rounded border border-zinc-200 p-2 text-sm dark:border-zinc-800">
-                  <span>{p.subType}</span>
-                  <span>{formatTRY(p.totalInvested)} — %{percent.toFixed(1)}</span>
+                <li key={f.category} className="flex items-center justify-between rounded border border-zinc-200 p-2 text-sm dark:border-zinc-800">
+                  <span>{f.category}</span>
+                  <span>{formatTRY(f.totalInvested)} — %{percent.toFixed(1)}</span>
                 </li>
               );
             })}

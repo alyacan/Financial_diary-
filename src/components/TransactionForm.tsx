@@ -26,8 +26,8 @@ const BALANCE_LABEL_PLACEHOLDER: Record<string, string> = {
 export default function TransactionForm({ onAdd }: Props) {
   const [assetType, setAssetType] = useState<AssetType>("gold");
   const [subType, setSubType] = useState<string>(GOLD_SUBTYPES[0].id);
+  const [fundCategory, setFundCategory] = useState<string>(FUND_CATEGORIES[0]);
   const [fundCustomName, setFundCustomName] = useState("");
-  const [fundCode, setFundCode] = useState("");
   const [date, setDate] = useState("");
   const [quantity, setQuantity] = useState("");
   const [buyPrice, setBuyPrice] = useState("");
@@ -41,7 +41,7 @@ export default function TransactionForm({ onAdd }: Props) {
     if (next === "gold") setSubType(GOLD_SUBTYPES[0].id);
     else if (next === "crypto") setSubType(CRYPTO_OPTIONS[0].id);
     else if (next === "forex") setSubType(FOREX_OPTIONS[0].code);
-    else if (next === "fund") setSubType(FUND_CATEGORIES[0]);
+    else if (next === "fund") { setSubType(""); setFundCategory(FUND_CATEGORIES[0]); }
     else if (next === "stock") setSubType("");
     else setSubType("");
   }
@@ -49,15 +49,16 @@ export default function TransactionForm({ onAdd }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!date) return;
+    if (assetType === "fund" && !subType.trim()) return; // fon kodu zorunlu
 
-    const resolvedSubType = assetType === "fund" && subType === "Diğer" ? (fundCustomName || "Diğer") : subType;
+    const resolvedFundCategory = fundCategory === "Diğer" ? (fundCustomName || "Diğer") : fundCategory;
 
     if (isBalanceOnly) {
       if (!amount) return;
       onAdd({
         id: crypto.randomUUID(),
         assetType,
-        subType: resolvedSubType || "Genel",
+        subType: subType || "Genel",
         date,
         quantity: parseFloat(amount),
         buyPrice: 1,
@@ -69,11 +70,12 @@ export default function TransactionForm({ onAdd }: Props) {
       onAdd({
         id: crypto.randomUUID(),
         assetType,
-        subType: resolvedSubType,
+        subType: assetType === "fund" ? subType.toUpperCase() : subType,
         date,
         quantity: parseFloat(quantity),
         buyPrice: parseFloat(buyPrice),
-        fundCode: assetType === "fund" && fundCode ? fundCode : undefined,
+        fundCode: assetType === "fund" ? subType.toUpperCase() : undefined,
+        fundCategory: assetType === "fund" ? resolvedFundCategory : undefined,
         note: note || undefined,
       });
       setQuantity("");
@@ -83,7 +85,6 @@ export default function TransactionForm({ onAdd }: Props) {
     setDate("");
     setNote("");
     setFundCustomName("");
-    setFundCode("");
   }
 
   return (
@@ -149,15 +150,21 @@ export default function TransactionForm({ onAdd }: Props) {
         {assetType === "fund" && (
           <>
             <label className="flex flex-col gap-1 text-sm">
+              Fon Kodu (TEFAS)
+              <input type="text" value={subType} onChange={(e) => setSubType(e.target.value)} required
+                placeholder="Örn: AFA"
+                className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
               Fon Kategorisi
-              <select value={subType} onChange={(e) => setSubType(e.target.value)}
+              <select value={fundCategory} onChange={(e) => setFundCategory(e.target.value)}
                 className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900">
                 {FUND_CATEGORIES.map((f) => (
                   <option key={f} value={f}>{f}</option>
                 ))}
               </select>
             </label>
-            {subType === "Diğer" && (
+            {fundCategory === "Diğer" && (
               <label className="flex flex-col gap-1 text-sm">
                 Kategori Adı
                 <input type="text" value={fundCustomName} onChange={(e) => setFundCustomName(e.target.value)}
@@ -165,12 +172,6 @@ export default function TransactionForm({ onAdd }: Props) {
                   className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
               </label>
             )}
-            <label className="flex flex-col gap-1 text-sm">
-              Fon Kodu (TEFAS, opsiyonel)
-              <input type="text" value={fundCode} onChange={(e) => setFundCode(e.target.value)}
-                placeholder="Örn: AFA"
-                className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
-            </label>
           </>
         )}
 

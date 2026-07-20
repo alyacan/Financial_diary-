@@ -47,7 +47,8 @@ export default function TransactionTable({ rows, onDelete }: Props) {
               <tr className={transaction.note ? "border-zinc-100 dark:border-zinc-900" : "border-b border-zinc-100 dark:border-zinc-900"}>
                 <td className="p-2 whitespace-nowrap">{formatDate(transaction.date)}</td>
                 <td className="p-2">
-                  {ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})
+                  {ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType}
+                  {transaction.fundCategory ? ` — ${transaction.fundCategory}` : ""})
                   {transaction.fundCode && (
                     <>
                       {" "}
