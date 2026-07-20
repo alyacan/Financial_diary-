@@ -1,24 +1,25 @@
-import { ParsedStatementRow } from "./bankParsers/types";
+import { BankParser, ParsedStatementRow } from "./bankParsers/types";
 import { isBankasiMaximum } from "./bankParsers/isBankasiMaximum";
-import { generic } from "./bankParsers/generic";
 
 export type { ParsedStatementRow };
 
-// Yeni banka desteği eklemek için: bankParsers/ altına bir dosya ekleyip buraya kaydet.
-// Sıra önemli — ilk `detect()` true dönen kullanılır, hiçbiri eşleşmezse `generic` devreye girer.
-const BANK_PARSERS = [isBankasiMaximum];
+// Yeni banka desteği eklemek için: bankParsers/ altına gerçek bir örnekle test edilmiş
+// bir dosya ekleyip buraya kaydet. Tanınmayan formatlar artık kör bir regex'e değil,
+// Gemini'nin metni okumasına düşer (bkz. /api/parse-statement/route.ts).
+const BANK_PARSERS: BankParser[] = [isBankasiMaximum];
 
 export interface ParseResult {
   rows: ParsedStatementRow[];
   bankLabel: string;
-  isGenericFallback: boolean;
 }
 
-export function parseStatementText(text: string): ParseResult {
+// Metin, bilinen bir banka formatına aitse ayrıştırıp döner; değilse null döner
+// (çağıran taraf bu durumda AI tabanlı çıkarıma düşmeli).
+export function parseKnownBankStatement(text: string): ParseResult | null {
   for (const parser of BANK_PARSERS) {
     if (parser.detect(text)) {
-      return { rows: parser.parse(text), bankLabel: parser.label, isGenericFallback: false };
+      return { rows: parser.parse(text), bankLabel: parser.label };
     }
   }
-  return { rows: generic.parse(text), bankLabel: generic.label, isGenericFallback: true };
+  return null;
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarNote, RECURRING_CALENDAR_INFO } from "@/lib/types";
+import { EconomicEvent } from "@/lib/economicCalendar";
 import DateSelect from "./DateSelect";
 
 const WEEKDAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
@@ -31,6 +32,14 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
   const [date, setDate] = useState("");
   const [text, setText] = useState("");
+  const [economicEvents, setEconomicEvents] = useState<EconomicEvent[]>([]);
+
+  useEffect(() => {
+    fetch("/api/economic-calendar")
+      .then((res) => res.json())
+      .then((data) => setEconomicEvents(data.events ?? []))
+      .catch(() => setEconomicEvents([]));
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +59,18 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
   for (const n of notes) {
     notesByDate.set(n.date, [...(notesByDate.get(n.date) ?? []), n]);
   }
+
+  const eventsByDate = new Map<string, EconomicEvent[]>();
+  for (const e of economicEvents) {
+    eventsByDate.set(e.date, [...(eventsByDate.get(e.date) ?? []), e]);
+  }
+
+  const todayForFilter = new Date().toISOString().slice(0, 10);
+  const ninetyDaysOut = new Date();
+  ninetyDaysOut.setDate(ninetyDaysOut.getDate() + 90);
+  const upcomingEvents = economicEvents
+    .filter((e) => e.date >= todayForFilter && e.date <= ninetyDaysOut.toISOString().slice(0, 10))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   const firstOfMonth = new Date(viewYear, viewMonth, 1);
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -100,6 +121,7 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
             if (day === null) return <div key={i} />;
             const iso = toISODate(viewYear, viewMonth, day);
             const dayNotes = notesByDate.get(iso) ?? [];
+            const dayEvents = eventsByDate.get(iso) ?? [];
             const isToday = iso === todayISO;
             const isWeekend = (leadingBlanks + day - 1) % 7 >= 5;
             const isSelected = date === iso;
@@ -118,16 +140,45 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
                 }`}
               >
                 <span className={isToday && !isSelected ? "font-bold" : ""}>{day}</span>
-                {dayNotes.length > 0 && (
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white dark:bg-black" : "bg-amber-500"}`}
-                    title={dayNotes.map((n) => n.text).join(", ")}
-                  />
+                {(dayNotes.length > 0 || dayEvents.length > 0) && (
+                  <span className="flex gap-0.5">
+                    {dayEvents.length > 0 && (
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white dark:bg-black" : "bg-blue-500"}`}
+                        title={dayEvents.map((e) => e.title).join(", ")}
+                      />
+                    )}
+                    {dayNotes.length > 0 && (
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white dark:bg-black" : "bg-amber-500"}`}
+                        title={dayNotes.map((n) => n.text).join(", ")}
+                      />
+                    )}
+                  </span>
                 )}
               </button>
             );
           })}
         </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-zinc-500">Otomatik Ekonomik Olaylar (önümüzdeki 90 gün)</h3>
+        {upcomingEvents.length === 0 ? (
+          <p className="text-sm text-zinc-500">Şu an gösterilecek olay yok (veya kaynak geçici olarak erişilemedi).</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {upcomingEvents.map((e, i) => (
+              <li key={i} className="flex items-center gap-2 rounded-lg border border-zinc-200 p-2 text-sm dark:border-zinc-800">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                <strong>{formatDate(e.date)}</strong>
+                {e.time && <span className="text-zinc-400">{e.time}</span>}
+                <span>{e.title}</span>
+                <span className="ml-auto text-xs text-zinc-400">{e.source}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div>

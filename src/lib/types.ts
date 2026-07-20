@@ -98,8 +98,7 @@ export interface CalendarNote {
 }
 
 export const RECURRING_CALENDAR_INFO = [
-  "TCMB PPK (Para Politikası Kurulu) faiz kararı — genelde ayın ortasında, önceden ilan edilen bir Perşembe günü açıklanır.",
-  "TÜİK enflasyon (TÜFE) verisi — genelde her ayın ilk haftasında açıklanır.",
-  "FED (ABD Merkez Bankası) FOMC faiz kararı — yaklaşık 6 haftada bir toplanır.",
-  "Bilanço/kâr açıklama dönemleri — çeyrek sonlarını takip eden birkaç hafta içinde yoğunlaşır.",
+  "TÜİK enflasyon (TÜFE) verisi — genelde her ayın ilk haftasında açıklanır. Resmi ve kesin tarih için tuik.gov.tr adresine bakılabilir (otomatik entegre edilemedi, TÜİK'in veri servisi dışarıdan erişilebilir değil).",
+  "OPEC(+) toplantıları — düzensiz aralıklarla yapılır, sabit bir takvimi yoktur. Güncel tarih için opec.org kontrol edilebilir.",
+  "Şirket bilanço/kâr açıklama ve temettü tarihleri — şirkete göre değişir, çeyrek sonlarını takip eden birkaç hafta içinde yoğunlaşır. Resmi tarih için KAP (Kamuyu Aydınlatma Platformu) takip edilebilir.",
 ] as const;
