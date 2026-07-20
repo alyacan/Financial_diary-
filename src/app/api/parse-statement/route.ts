@@ -2,9 +2,51 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRequire } from "module";
 import { GoogleGenAI } from "@google/genai";
 import { parseStatementText } from "@/lib/statementParser";
+import { ParsedStatementRow } from "@/lib/bankParsers/types";
 import { EXPENSE_CATEGORIES } from "@/lib/types";
 
 const require = createRequire(import.meta.url);
+
+// pdf-parse metin çıkaramadığında (ör. ekran görüntüsünden oluşturulmuş, seçilebilir
+// metni olmayan PDF'ler) bu eşiğin altında kalır — bu durumda regex yerine Gemini'nin
+// görüntüyü doğrudan "görüp" işlemleri okumasını isteriz.
+const MIN_TEXT_LENGTH_FOR_REGEX = 50;
+
+async function extractViaGeminiVision(buffer: Buffer, apiKey: string): Promise<ParsedStatementRow[]> {
+  const ai = new GoogleGenAI({ apiKey });
+  const prompt = `Bu bir banka/kredi kartı hesap ekstresi görüntüsüdür. Sadece GERÇEK HARCAMA (para çıkışı, üçüncü tarafa yapılan ödeme/satın alma) işlemlerini listele.
+Şunları KESİNLİKLE HARİÇ TUT:
+- Hesaba gelen para (gelen EFT/havale, maaş, iade, tahsilat)
+- Hesaplar arası transfer/aktarım (örn. "HESAPTAN AKTARIM", "Vadeli Hesaba Para Yatırma", "Hesap Açılış")
+- Banka tarafından yapılan faiz/komisyon tahsilatı işlemleri (senin harcaman değil)
+Sadece market, restoran, fatura ödemesi, ATM'den nakit çekme gibi gerçek üçüncü taraf harcamalarını dahil et.
+
+Her harcama için:
+- date: YYYY-MM-DD formatında (görüntüdeki tarih formatı ne olursa olsun)
+- description: işlem açıklaması (kısa, orijinal dile sadık)
+- amount: pozitif sayı (TL), ondalık ayracı nokta olacak şekilde normalize et
+
+Sadece şu şekilde bir JSON dizisi döndür, başka hiçbir açıklama ekleme:
+[{"date": "2024-01-15", "description": "...", "amount": 123.45}, ...]
+Hiç harcama bulamazsan boş dizi [] döndür.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-flash-latest",
+    contents: [
+      {
+        role: "user",
+        parts: [{ inlineData: { mimeType: "application/pdf", data: buffer.toString("base64") } }, { text: prompt }],
+      },
+    ],
+    config: { responseMimeType: "application/json" },
+  });
+
+  const parsed = JSON.parse(response.text ?? "[]");
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .filter((r) => r && typeof r.date === "string" && typeof r.description === "string" && typeof r.amount === "number")
+    .map((r) => ({ date: r.date, description: r.description, amount: r.amount }));
+}
 
 async function categorize(descriptions: string[], apiKey: string): Promise<string[]> {
   const ai = new GoogleGenAI({ apiKey });
@@ -54,21 +96,37 @@ export async function POST(req: NextRequest) {
     const pdfParse = require("pdf-parse/lib/pdf-parse.js");
     const result = await pdfParse(buffer);
     text = result.text;
-  } catch (err) {
-    return NextResponse.json(
-      { error: "PDF okunamadı: " + (err instanceof Error ? err.message : "bilinmeyen hata") },
-      { status: 400 }
-    );
+  } catch {
+    text = ""; // metin çıkarılamadıysa görüntü tabanlı PDF olabilir, aşağıda AI ile denenir
   }
 
-  const { rows, bankLabel, isGenericFallback } = parseStatementText(text);
+  let rows: ParsedStatementRow[];
+  let bankLabel: string;
+  let formatWarning: string | undefined;
+
+  if (text.trim().length >= MIN_TEXT_LENGTH_FOR_REGEX) {
+    const result = parseStatementText(text);
+    rows = result.rows;
+    bankLabel = result.bankLabel;
+    formatWarning = result.isGenericFallback
+      ? "Banka formatı otomatik tanınamadı, genel bir ayrıştırma kullanıldı. Lütfen tarih/tutar/açıklamaları kontrol et."
+      : undefined;
+  } else {
+    try {
+      rows = await extractViaGeminiVision(buffer, apiKey);
+    } catch (err) {
+      return NextResponse.json(
+        { error: "PDF'ten metin çıkarılamadı ve AI ile görüntü okuma da başarısız oldu: " + (err instanceof Error ? err.message : "bilinmeyen hata") },
+        { status: 400 }
+      );
+    }
+    bankLabel = "AI ile görüntüden okundu";
+    formatWarning = "Bu PDF'te seçilebilir metin yoktu (muhtemelen ekran görüntüsü), işlemler AI ile görüntüden okundu. Tutarları ve tarihleri mutlaka kontrol et.";
+  }
+
   if (rows.length === 0) {
     return NextResponse.json({ error: "Ekstrede tanınabilir işlem bulunamadı." }, { status: 400 });
   }
-
-  const formatWarning = isGenericFallback
-    ? `Banka formatı otomatik tanınamadı, genel bir ayrıştırma kullanıldı. Lütfen tarih/tutar/açıklamaları kontrol et.`
-    : undefined;
 
   try {
     const categories = await categorize(rows.map((r) => r.description), apiKey);
