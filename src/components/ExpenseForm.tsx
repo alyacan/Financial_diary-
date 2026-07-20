@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { EXPENSE_CATEGORIES, Expense } from "@/lib/types";
+import DateSelect from "./DateSelect";
 
 interface Props {
   onAdd: (expense: Expense) => void;
@@ -37,8 +38,7 @@ export default function ExpenseForm({ onAdd }: Props) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1 text-sm">
           Tarih
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required
-            className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
+          <DateSelect value={date} onChange={setDate} required />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Kategori

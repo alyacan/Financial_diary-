@@ -45,7 +45,7 @@ export default function TransactionTable({ rows, onDelete }: Props) {
           {rows.map(({ transaction, currentPrice, profit, profitPercent, priceAvailable }) => (
             <Fragment key={transaction.id}>
               <tr className={transaction.note ? "border-zinc-100 dark:border-zinc-900" : "border-b border-zinc-100 dark:border-zinc-900"}>
-                <td className="p-2 whitespace-nowrap">{formatDate(transaction.date)} {transaction.time}</td>
+                <td className="p-2 whitespace-nowrap">{formatDate(transaction.date)}</td>
                 <td className="p-2">{ASSET_LABELS[transaction.assetType] ?? transaction.assetType} ({transaction.subType})</td>
                 {BALANCE_ONLY_TYPES.includes(transaction.assetType) ? (
                   <>

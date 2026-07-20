@@ -10,6 +10,7 @@ import {
   GOLD_SUBTYPES,
   Transaction,
 } from "@/lib/types";
+import DateSelect from "./DateSelect";
 
 interface Props {
   onAdd: (transaction: Transaction) => void;
@@ -27,10 +28,8 @@ export default function TransactionForm({ onAdd }: Props) {
   const [subType, setSubType] = useState<string>(GOLD_SUBTYPES[0].id);
   const [fundCustomName, setFundCustomName] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
   const [quantity, setQuantity] = useState("");
   const [buyPrice, setBuyPrice] = useState("");
-  const [commission, setCommission] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
 
@@ -59,32 +58,27 @@ export default function TransactionForm({ onAdd }: Props) {
         assetType,
         subType: resolvedSubType || "Genel",
         date,
-        time: time || "00:00",
         quantity: parseFloat(amount),
         buyPrice: 1,
         note: note || undefined,
       });
       setAmount("");
     } else {
-      if (!time || !quantity || !buyPrice) return;
+      if (!quantity || !buyPrice) return;
       onAdd({
         id: crypto.randomUUID(),
         assetType,
         subType: resolvedSubType,
         date,
-        time,
         quantity: parseFloat(quantity),
         buyPrice: parseFloat(buyPrice),
-        commission: commission ? parseFloat(commission) : undefined,
         note: note || undefined,
       });
       setQuantity("");
       setBuyPrice("");
-      setCommission("");
     }
 
     setDate("");
-    setTime("");
     setNote("");
     setFundCustomName("");
   }
@@ -191,11 +185,10 @@ export default function TransactionForm({ onAdd }: Props) {
       </div>
 
       {isBalanceOnly ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm">
             Tarih
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required
-              className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
+            <DateSelect value={date} onChange={setDate} required />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Tutar (TL)
@@ -204,16 +197,10 @@ export default function TransactionForm({ onAdd }: Props) {
           </label>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <label className="flex flex-col gap-1 text-sm">
             Alış Tarihi
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required
-              className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            Alış Saati
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required
-              className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
+            <DateSelect value={date} onChange={setDate} required />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Miktar
@@ -225,18 +212,13 @@ export default function TransactionForm({ onAdd }: Props) {
             <input type="number" step="any" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} required
               className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
           </label>
-          <label className="flex flex-col gap-1 text-sm">
-            Komisyon (opsiyonel)
-            <input type="number" step="any" value={commission} onChange={(e) => setCommission(e.target.value)}
-              className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
-          </label>
         </div>
       )}
 
       <label className="flex flex-col gap-1 text-sm">
-        Not (finans günlüğü)
+        Not (finans günlüğü — komisyon vb. eklemek istersen buraya yaz)
         <input type="text" value={note} onChange={(e) => setNote(e.target.value)}
-          placeholder="Örn: ABD-İran gerilimi nedeniyle aldım"
+          placeholder="Örn: ABD-İran gerilimi nedeniyle aldım, 25 TL komisyon ödendi"
           className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
       </label>
 

@@ -12,8 +12,7 @@ function formatTRY(value: number): string {
 const QUICK_LINKS = [
   { href: "/yatirimlar", label: "Yatırımlar", description: "İşlem ekle, portföyünü ve kâr/zararını gör" },
   { href: "/harcamalar", label: "Harcamalar", description: "Ekstre yükle, kategori bazlı harcamalarını takip et" },
-  { href: "/gunluk", label: "Finans Günlüğü", description: "Yatırım kararlarının gerekçeleri" },
-  { href: "/takvim", label: "Finansal Takvim", description: "Önemli ekonomik tarihler" },
+  { href: "/gunluk", label: "Finans Günlüğüm 📓", description: "Finansal takvim ve yatırım kararlarının gerekçeleri" },
 ];
 
 export default function Home() {
@@ -56,7 +55,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {QUICK_LINKS.map((link) => (
           <Link
             key={link.href}

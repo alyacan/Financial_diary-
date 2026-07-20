@@ -41,16 +41,17 @@ export const GOLD_SUBTYPES = [
 ] as const;
 
 export const FUND_CATEGORIES = [
+  "Likit Fon",
   "Teknoloji Ağırlıklı",
   "Yabancı Hisse Ağırlıklı",
   "BIST 100",
-  "BIST 30 Dışı Hisse Senedi Yoğun",
+  "BIST 30 Dışı",
+  "Hisse Senedi Yoğun",
   "Bankacılık",
   "Yarı İletkenler",
   "Gayrimenkul",
   "Temiz Enerji",
   "Sağlık Hizmetleri",
-  "Likit Fon",
   "Diğer",
 ] as const;
 
@@ -59,10 +60,8 @@ export interface Transaction {
   assetType: AssetType;
   subType: string; // gold: "gram" | crypto coin id | forex currency code
   date: string; // YYYY-MM-DD
-  time: string; // HH:mm
   quantity: number; // gram / adet / birim
   buyPrice: number; // TL per unit
-  commission?: number;
   note?: string;
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CalendarNote, RECURRING_CALENDAR_INFO } from "@/lib/types";
+import DateSelect from "./DateSelect";
 
 const WEEKDAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 const MONTH_NAMES = [
@@ -65,33 +66,63 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <button onClick={() => goToMonth(-1)} className="rounded px-2 py-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">←</button>
-          <span className="font-semibold">{MONTH_NAMES[viewMonth]} {viewYear}</span>
-          <button onClick={() => goToMonth(1)} className="rounded px-2 py-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">→</button>
+      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            onClick={() => goToMonth(-1)}
+            aria-label="Önceki ay"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            ←
+          </button>
+          <span className="text-base font-semibold tracking-tight">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+          <button
+            onClick={() => goToMonth(1)}
+            aria-label="Sonraki ay"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            →
+          </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center text-xs text-zinc-500">
-          {WEEKDAYS.map((w) => (
-            <div key={w} className="p-1 font-medium">{w}</div>
+        <div className="grid grid-cols-7 gap-1">
+          {WEEKDAYS.map((w, i) => (
+            <div
+              key={w}
+              className={`p-1 text-center text-[11px] font-semibold tracking-wide uppercase ${
+                i >= 5 ? "text-zinc-400" : "text-zinc-500"
+              }`}
+            >
+              {w}
+            </div>
           ))}
           {cells.map((day, i) => {
             if (day === null) return <div key={i} />;
             const iso = toISODate(viewYear, viewMonth, day);
             const dayNotes = notesByDate.get(iso) ?? [];
             const isToday = iso === todayISO;
+            const isWeekend = (leadingBlanks + day - 1) % 7 >= 5;
+            const isSelected = date === iso;
             return (
               <button
                 key={i}
                 onClick={() => setDate(iso)}
-                className={`flex min-h-[3.5rem] flex-col items-center rounded border p-1 text-xs ${
-                  isToday ? "border-zinc-900 dark:border-zinc-100" : "border-zinc-200 dark:border-zinc-800"
-                } ${date === iso ? "bg-zinc-100 dark:bg-zinc-800" : ""} hover:bg-zinc-50 dark:hover:bg-zinc-900`}
+                className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-1 rounded-lg text-sm transition-colors ${
+                  isSelected
+                    ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black"
+                    : isToday
+                      ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                      : isWeekend
+                        ? "text-zinc-400 hover:bg-zinc-50 dark:text-zinc-500 dark:hover:bg-zinc-900"
+                        : "hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                }`}
               >
-                <span className={isToday ? "font-bold" : ""}>{day}</span>
+                <span className={isToday && !isSelected ? "font-bold" : ""}>{day}</span>
                 {dayNotes.length > 0 && (
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500" title={dayNotes.map((n) => n.text).join(", ")} />
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white dark:bg-black" : "bg-amber-500"}`}
+                    title={dayNotes.map((n) => n.text).join(", ")}
+                  />
                 )}
               </button>
             );
@@ -115,7 +146,7 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
         ) : (
           <ul className="flex flex-col gap-2">
             {sortedNotes.map((n) => (
-              <li key={n.id} className="flex items-start justify-between gap-2 rounded border border-zinc-200 p-2 text-sm dark:border-zinc-800">
+              <li key={n.id} className="flex items-start justify-between gap-2 rounded-lg border border-zinc-200 p-2 text-sm dark:border-zinc-800">
                 <span><strong>{formatDate(n.date)}</strong> — {n.text}</span>
                 <button onClick={() => onDelete(n.id)} className="shrink-0 text-zinc-400 hover:text-red-600">Sil</button>
               </li>
@@ -124,11 +155,10 @@ export default function FinancialCalendar({ notes, onAdd, onDelete }: Props) {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="flex flex-col gap-1 text-sm">
           Tarih
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            className="rounded border border-zinc-300 p-2 dark:border-zinc-700 dark:bg-zinc-900" />
+          <DateSelect value={date} onChange={setDate} />
         </label>
         <label className="flex flex-1 flex-col gap-1 text-sm">
           Not

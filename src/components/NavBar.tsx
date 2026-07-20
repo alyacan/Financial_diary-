@@ -7,8 +7,7 @@ const LINKS = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/yatirimlar", label: "Yatırımlar" },
   { href: "/harcamalar", label: "Harcamalar" },
-  { href: "/gunluk", label: "Finans Günlüğü" },
-  { href: "/takvim", label: "Finansal Takvim" },
+  { href: "/gunluk", label: "Finans Günlüğüm 📓" },
 ];
 
 export default function NavBar() {

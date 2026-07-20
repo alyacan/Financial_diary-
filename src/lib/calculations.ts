@@ -39,7 +39,7 @@ export interface TransactionProfit {
 }
 
 function transactionCost(t: Transaction): number {
-  return t.quantity * t.buyPrice + (t.commission ?? 0);
+  return t.quantity * t.buyPrice;
 }
 
 export function calculatePositions(

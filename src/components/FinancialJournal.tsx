@@ -18,7 +18,7 @@ interface Props {
 export default function FinancialJournal({ transactions }: Props) {
   const entries = transactions
     .filter((t) => t.note)
-    .sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   if (entries.length === 0) {
     return (
@@ -33,7 +33,7 @@ export default function FinancialJournal({ transactions }: Props) {
       {entries.map((t) => (
         <div key={t.id} className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
           <div className="flex flex-wrap items-baseline gap-2 text-sm text-zinc-500">
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">📅 {formatDate(t.date)} {t.time}</span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">📅 {formatDate(t.date)}</span>
             <span>—</span>
             <span>{ASSET_LABELS[t.assetType] ?? t.assetType} ({t.subType})</span>
             <span>—</span>
