@@ -10,7 +10,7 @@ Yatırımlarını (altın, kripto, döviz) takip eden, otomatik kâr/zarar hesap
 
 - **Manuel yatırım girişi**: Altın (Gram/Çeyrek/Cumhuriyet), kripto (BTC/ETH), döviz (USD/EUR), Fon (Likit Fon, Teknoloji Ağırlıklı, BIST 30 Dışı, Hisse Senedi Yoğun vb. + özel kategori girişi), Hisse, Banka, Vadeli Hesap, Mevduat, Nakit. Tarih girişi, tarayıcı/işletim sistemi diline bağlı kalmadan her zaman Gün/Ay/Yıl (Türkçe) sırasında.
 - **Otomatik kâr/zarar hesaplama**: Ortalama maliyet, toplam yatırım, güncel değer, işlem bazlı ve toplam kâr/zarar (yüzde dahil). Banka/Vadeli Hesap/Mevduat/Nakit için kâr/zarar hesaplanmaz — bunlar sadece portföydeki bakiye payını gösterir.
-- **Canlı fiyatlar**: Kripto (CoinGecko), döviz (Frankfurter) ve gram altın (uluslararası ons altın vadeli işlem fiyatı, Yahoo Finance + USD/TRY kuru ile hesaplanır — kuyumcu satış fiyatından işçilik/prim farkı nedeniyle sapabilir, referans niteliğindedir) otomatik çekilir. Çeyrek/Cumhuriyet altın ve Fon/Hisse için güvenilir ücretsiz canlı API bulunmadığından manuel giriş kullanılır (Fon/Hisse için henüz fiyat girişi arayüzü yok, sadece yatırılan tutara göre dağılım gösterilir).
+- **Canlı fiyatlar**: Kripto (CoinGecko), döviz (Frankfurter) ve gram altın (uluslararası ons altın vadeli işlem fiyatı, Yahoo Finance + USD/TRY kuru ile hesaplanır — kuyumcu satış fiyatından işçilik/prim farkı nedeniyle sapabilir, referans niteliğindedir) otomatik çekilir. Çeyrek/Cumhuriyet altın ve **Fon (TEFAS kodu bazında)** için manuel güncel fiyat girişi var — TEFAS otomatik veri çekmeye karşı ciddi bot koruması (F5/Shape Security) kullandığı için canlı entegrasyon denenmedi; kullanıcı TEFAS linkine tıklayıp gerçek fiyatı görüp elle girer, gerçek kâr/zarar hesabı bu şekilde çalışır. Hisse için henüz fiyat girişi yok.
 - **Portföy dağılım grafiği**: Varlık türüne göre yatay çubuk grafik (dataviz iyi pratiklerine uygun — çakışan etiket yok, küsüratsız kısa değerler). Ayrıca Fon kategorileri için yatırılan tutara göre ayrı bir dağılım listesi.
 - **AI destekli tarihsel olay analizi**: Her işlem için, o tarihteki önemli ekonomik/siyasi gelişmelerin kısa özeti; istenirse Gemini ile IMRaD formatında + SWOT analizi içeren detaylı rapora genişletilebilir. Model gerçek zamanlı internete erişemediği için yalnızca eğitim verisindeki bilgiye dayanır ve emin olmadığı durumları açıkça belirtir (uydurma kaynak vermez). **Bilinen sınır:** Model kendi eğitim verisi kapsamına çok yakın veya sonraki tarihler için ("bu ay yaptığım işlem gibi") dürüstçe bilgisi olmadığını söyler — bu bir hata değil, kasıtlı bir güvenlik davranışıdır. (Google Arama ile gerçek zamanlı erişim teknik olarak mümkün ama ücretsiz key'lerde kota dışı; faturalandırma açılırsa etkinleştirilebilir.)
 - **Harcama Analizi**: Kategori bazlı (Market, Yemek, Ulaşım, Eğlence, Spor, Eğitim, Kira, Faturalar, Sağlık, Diğer) manuel harcama girişi, toplam harcama özeti, kategori dağılım çubuk grafiği.
@@ -53,7 +53,7 @@ http://localhost:3000 adresinden açın.
 
 Bu bölümdeki özellikler projenin uzun vadeli hedefidir, MVP kapsamında değildir:
 
-- Fon/Hisse için canlı veya manuel güncel fiyat girişi (yıllık getiri, risk seviyesi)
+- Hisse için manuel güncel fiyat girişi; Fon'un yıllık getiri/risk seviyesi gösterimi
 - Hedef bazlı bütçe (kategori başına aylık hedef ve geçen aya göre karşılaştırma)
 - CSV/Excel formatında ekstre desteği (şu an sadece PDF)
 - TÜİK TÜFE, OPEC ve şirket bilanço/temettü tarihlerinin otomatikleştirilmesi (güvenilir ücretsiz kaynak henüz bulunamadı)
