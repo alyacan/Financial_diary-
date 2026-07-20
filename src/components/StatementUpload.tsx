@@ -27,6 +27,7 @@ export default function StatementUpload({ existingExpenses, onImport }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const [bankLabel, setBankLabel] = useState<string | null>(null);
 
   async function handleUpload() {
     if (!file) return;
@@ -48,6 +49,7 @@ export default function StatementUpload({ existingExpenses, onImport }: Props) {
         return { ...r, include: !isDuplicate, isDuplicate };
       });
       setRows(parsedRows);
+      setBankLabel(data.bankLabel ?? null);
       const duplicateCount = parsedRows.filter((r) => r.isDuplicate).length;
       if (duplicateCount > 0) {
         setWarning(
@@ -109,7 +111,9 @@ export default function StatementUpload({ existingExpenses, onImport }: Props) {
 
       {rows.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-sm text-zinc-500">{rows.length} işlem bulundu. Kategorileri kontrol et, istemediklerini işaretten kaldır.</p>
+          <p className="mb-2 text-sm text-zinc-500">
+            {rows.length} işlem bulundu{bankLabel ? ` — algılanan format: ${bankLabel}` : ""}. Kategorileri kontrol et, istemediklerini işaretten kaldır.
+          </p>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] border-collapse text-sm">
               <thead>

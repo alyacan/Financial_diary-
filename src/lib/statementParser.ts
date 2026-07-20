@@ -1,39 +1,24 @@
-export interface ParsedStatementRow {
-  date: string; // YYYY-MM-DD
-  description: string;
-  amount: number; // TL, only positive (actual purchases) rows are returned
+import { ParsedStatementRow } from "./bankParsers/types";
+import { isBankasiMaximum } from "./bankParsers/isBankasiMaximum";
+import { generic } from "./bankParsers/generic";
+
+export type { ParsedStatementRow };
+
+// Yeni banka desteği eklemek için: bankParsers/ altına bir dosya ekleyip buraya kaydet.
+// Sıra önemli — ilk `detect()` true dönen kullanılır, hiçbiri eşleşmezse `generic` devreye girer.
+const BANK_PARSERS = [isBankasiMaximum];
+
+export interface ParseResult {
+  rows: ParsedStatementRow[];
+  bankLabel: string;
+  isGenericFallback: boolean;
 }
 
-// PDF metin çıkarımında sütunlar arası boşluk kaybolabiliyor (örn. "...TR40,00" veya
-// "405,000,04" gibi tutar+maxipuan bitişik). Bu yüzden tutarı boşluk şartı koymadan,
-// açıklamadan hemen sonraki ilk "sayı,İKİHANE" örüntüsü olarak yakalıyoruz; sonrası (maxipuan vb.) yok sayılır.
-const LINE_REGEX = /^(\d{2})\/(\d{2})\/(\d{4})\s+(.+?)(-?[\d.]+,\d{2})/;
-
-function parseTurkishNumber(raw: string): number {
-  return parseFloat(raw.replace(/\./g, "").replace(",", "."));
-}
-
-// Ekstredeki "İşlem Tarihi | Açıklama | Tutar | Taksit Bilgisi | Maxipuan" formatındaki
-// satırları ayrıştırır. Sadece pozitif tutarlı (gerçek harcama) satırlar döner —
-// negatif tutarlar hesaba yapılan ödeme/aktarım veya iadedir, harcama değildir.
-export function parseStatementText(text: string): ParsedStatementRow[] {
-  const rows: ParsedStatementRow[] = [];
-
-  for (const line of text.split("\n")) {
-    const trimmed = line.trim();
-    const match = trimmed.match(LINE_REGEX);
-    if (!match) continue;
-
-    const [, dd, mm, yyyy, description, amountRaw] = match;
-    const amount = parseTurkishNumber(amountRaw);
-    if (amount <= 0) continue; // negatif = ödeme/iade, harcama değil
-
-    rows.push({
-      date: `${yyyy}-${mm}-${dd}`,
-      description: description.trim(),
-      amount,
-    });
+export function parseStatementText(text: string): ParseResult {
+  for (const parser of BANK_PARSERS) {
+    if (parser.detect(text)) {
+      return { rows: parser.parse(text), bankLabel: parser.label, isGenericFallback: false };
+    }
   }
-
-  return rows;
+  return { rows: generic.parse(text), bankLabel: generic.label, isGenericFallback: true };
 }

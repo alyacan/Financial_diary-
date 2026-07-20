@@ -61,18 +61,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const rows = parseStatementText(text);
+  const { rows, bankLabel, isGenericFallback } = parseStatementText(text);
   if (rows.length === 0) {
     return NextResponse.json({ error: "Ekstrede tanınabilir işlem bulunamadı." }, { status: 400 });
   }
 
+  const formatWarning = isGenericFallback
+    ? `Banka formatı otomatik tanınamadı, genel bir ayrıştırma kullanıldı. Lütfen tarih/tutar/açıklamaları kontrol et.`
+    : undefined;
+
   try {
     const categories = await categorize(rows.map((r) => r.description), apiKey);
     const categorized = rows.map((r, i) => ({ ...r, category: categories[i] ?? "Diğer" }));
-    return NextResponse.json({ rows: categorized });
+    return NextResponse.json({ rows: categorized, bankLabel, warning: formatWarning });
   } catch (err) {
     // AI kategorizasyonu başarısız olsa bile ayrıştırılan işlemleri "Diğer" ile dönebiliriz.
     const categorized = rows.map((r) => ({ ...r, category: "Diğer" }));
-    return NextResponse.json({ rows: categorized, warning: "AI kategorizasyon başarısız oldu, tümü 'Diğer' olarak işaretlendi." });
+    const warning = [formatWarning, "AI kategorizasyon başarısız oldu, tümü 'Diğer' olarak işaretlendi."]
+      .filter(Boolean)
+      .join(" ");
+    return NextResponse.json({ rows: categorized, bankLabel, warning });
   }
 }
