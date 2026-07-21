@@ -94,6 +94,11 @@ export interface Expense {
   note?: string;
 }
 
+export interface PortfolioSnapshot {
+  date: string; // YYYY-MM-DD
+  value: number; // o günkü toplam güncel portföy değeri (TRY)
+}
+
 export interface CalendarNote {
   id: string;
   date: string; // YYYY-MM-DD

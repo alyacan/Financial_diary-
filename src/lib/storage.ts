@@ -1,9 +1,11 @@
-import { ArchivedPeriod, CalendarNote, Expense, Transaction } from "./types";
+import { ArchivedPeriod, CalendarNote, Expense, PortfolioSnapshot, Transaction } from "./types";
 
 const STORAGE_KEY = "financial-diary-transactions";
 const EXPENSES_STORAGE_KEY = "financial-diary-expenses";
 const CALENDAR_STORAGE_KEY = "financial-diary-calendar-notes";
 const ARCHIVED_PERIODS_STORAGE_KEY = "financial-diary-archived-periods";
+const PORTFOLIO_SNAPSHOTS_STORAGE_KEY = "financial-diary-portfolio-snapshots";
+const MAX_PORTFOLIO_SNAPSHOTS = 90;
 
 export function loadTransactions(): Transaction[] {
   if (typeof window === "undefined") return [];
@@ -150,4 +152,29 @@ export function closePeriod(currentExpenses: Expense[]): {
   saveExpenses([]);
 
   return { archivedPeriods: updatedPeriods, expenses: [] };
+}
+
+export function loadPortfolioSnapshots(): PortfolioSnapshot[] {
+  if (typeof window === "undefined") return [];
+  const raw = window.localStorage.getItem(PORTFOLIO_SNAPSHOTS_STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as PortfolioSnapshot[];
+  } catch {
+    return [];
+  }
+}
+
+// Portföy Değeri trend grafiği: geriye dönük veri yoktu, bu yüzden geçmiş
+// üretilmez — bugünden itibaren her ziyarette günün değeri kaydedilir/güncellenir
+// ve grafik zamanla gerçek verilerle birikir.
+export function recordPortfolioSnapshot(value: number): PortfolioSnapshot[] {
+  if (typeof window === "undefined") return [];
+  const today = new Date().toISOString().slice(0, 10);
+  const existing = loadPortfolioSnapshots().filter((s) => s.date !== today);
+  const updated = [...existing, { date: today, value }]
+    .sort((a, b) => (a.date < b.date ? -1 : 1))
+    .slice(-MAX_PORTFOLIO_SNAPSHOTS);
+  window.localStorage.setItem(PORTFOLIO_SNAPSHOTS_STORAGE_KEY, JSON.stringify(updated));
+  return updated;
 }
