@@ -72,24 +72,24 @@ export default function HarcamalarPage() {
 
       {archivedPeriods.length > 0 && (
         <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-          <h2 className="mb-2 text-lg font-semibold">Arşivlenen Dönemler</h2>
-          <ul className="flex flex-col gap-2">
+          <h2 className="mb-3 text-lg font-semibold">Arşivlenen Dönemler ({archivedPeriods.length})</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {[...archivedPeriods].reverse().map((period) => (
-              <li key={period.id}>
-                <Link
-                  href={`/harcamalar/donem/${period.id}`}
-                  className="flex items-center justify-between rounded border border-zinc-200 p-3 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
-                >
-                  <span className="font-medium">
-                    {formatDate(period.startDate)} - {formatDate(period.endDate)}
-                  </span>
-                  <span className="text-zinc-500">
-                    {period.expenses.length} harcama · {formatTRY(period.expenses.reduce((sum, e) => sum + e.amount, 0))}
-                  </span>
-                </Link>
-              </li>
+              <Link
+                key={period.id}
+                href={`/harcamalar/donem/${period.id}`}
+                className="flex flex-col items-center gap-1 rounded-lg border border-zinc-200 p-3 text-center hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:border-zinc-600 dark:hover:bg-zinc-900"
+              >
+                <span className="text-4xl">📁</span>
+                <span className="text-sm font-medium leading-tight">
+                  {formatDate(period.startDate)} - {formatDate(period.endDate)}
+                </span>
+                <span className="text-xs text-zinc-500">
+                  {period.expenses.length} harcama · {formatTRY(period.expenses.reduce((sum, e) => sum + e.amount, 0))}
+                </span>
+              </Link>
             ))}
-          </ul>
+          </div>
         </section>
       )}
     </div>

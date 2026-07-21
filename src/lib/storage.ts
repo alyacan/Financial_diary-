@@ -113,30 +113,34 @@ export function saveArchivedPeriods(periods: ArchivedPeriod[]): void {
 
 // Dönemi Kapat: aktif harcamaları silmeden arşivler, aktif listeyi boşaltır.
 // Başlangıç tarihi = önceki dönemin bitişinden bir gün sonrası (önceki dönem
-// yoksa aktif harcamaların en erkeni); bitiş tarihi = bugün.
+// yoksa aktif harcamaların en erkeni); bitiş tarihi = bugün. Aynı gün içinde
+// art arda birden fazla dönem kapatılırsa (ör. geçmişe dönük klasörleme)
+// başlangıç bitişi geçemez — bu durumda tek günlük bir dönem oluşur.
 export function closePeriod(currentExpenses: Expense[]): {
   archivedPeriods: ArchivedPeriod[];
   expenses: Expense[];
 } {
   const archivedPeriods = loadArchivedPeriods();
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const endDate = new Date().toISOString().slice(0, 10);
 
   const lastPeriod = archivedPeriods[archivedPeriods.length - 1];
   let startDate: string;
   if (lastPeriod) {
     const nextDay = new Date(lastPeriod.endDate);
     nextDay.setDate(nextDay.getDate() + 1);
-    startDate = nextDay.toISOString().slice(0, 10);
+    const candidateStart = nextDay.toISOString().slice(0, 10);
+    startDate = candidateStart > endDate ? endDate : candidateStart;
   } else if (currentExpenses.length > 0) {
-    startDate = currentExpenses.reduce((min, e) => (e.date < min ? e.date : min), currentExpenses[0].date);
+    const earliest = currentExpenses.reduce((min, e) => (e.date < min ? e.date : min), currentExpenses[0].date);
+    startDate = earliest > endDate ? endDate : earliest;
   } else {
-    startDate = todayIso;
+    startDate = endDate;
   }
 
   const newPeriod: ArchivedPeriod = {
     id: crypto.randomUUID(),
     startDate,
-    endDate: todayIso,
+    endDate,
     createdAt: new Date().toISOString(),
     expenses: currentExpenses,
   };
