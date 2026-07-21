@@ -100,6 +100,16 @@ export interface CalendarNote {
   text: string;
 }
 
+// Dönemi Kapat / Klasörle: kullanıcı istediği an mevcut harcamaları silmeden
+// arşivler, ana ekran yeni dönem için temizlenir.
+export interface ArchivedPeriod {
+  id: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  createdAt: string; // ISO timestamp — klasörleme anı
+  expenses: Expense[];
+}
+
 export const RECURRING_CALENDAR_INFO = [
   "TÜİK enflasyon (TÜFE) verisi — genelde her ayın ilk haftasında açıklanır. Resmi ve kesin tarih için tuik.gov.tr adresine bakılabilir (otomatik entegre edilemedi, TÜİK'in veri servisi dışarıdan erişilebilir değil).",
   "OPEC(+) toplantıları — düzensiz aralıklarla yapılır, sabit bir takvimi yoktur. Güncel tarih için opec.org kontrol edilebilir.",

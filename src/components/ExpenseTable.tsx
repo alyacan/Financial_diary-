@@ -8,7 +8,7 @@ function formatTRY(value: number): string {
 
 interface Props {
   expenses: Expense[];
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export default function ExpenseTable({ expenses, onDelete }: Props) {
@@ -27,7 +27,7 @@ export default function ExpenseTable({ expenses, onDelete }: Props) {
             <th className="p-2">Kategori</th>
             <th className="p-2">Tutar</th>
             <th className="p-2">Not</th>
-            <th className="p-2"></th>
+            {onDelete && <th className="p-2"></th>}
           </tr>
         </thead>
         <tbody>
@@ -37,11 +37,13 @@ export default function ExpenseTable({ expenses, onDelete }: Props) {
               <td className="p-2">{e.category}</td>
               <td className="p-2">{formatTRY(e.amount)}</td>
               <td className="p-2 max-w-[200px] truncate" title={e.note}>{e.note}</td>
-              <td className="p-2">
-                <button onClick={() => onDelete(e.id)} className="text-zinc-400 hover:text-red-600">
-                  Sil
-                </button>
-              </td>
+              {onDelete && (
+                <td className="p-2">
+                  <button onClick={() => onDelete(e.id)} className="text-zinc-400 hover:text-red-600">
+                    Sil
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

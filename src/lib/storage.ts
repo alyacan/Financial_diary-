@@ -1,8 +1,9 @@
-import { CalendarNote, Expense, Transaction } from "./types";
+import { ArchivedPeriod, CalendarNote, Expense, Transaction } from "./types";
 
 const STORAGE_KEY = "financial-diary-transactions";
 const EXPENSES_STORAGE_KEY = "financial-diary-expenses";
 const CALENDAR_STORAGE_KEY = "financial-diary-calendar-notes";
+const ARCHIVED_PERIODS_STORAGE_KEY = "financial-diary-archived-periods";
 
 export function loadTransactions(): Transaction[] {
   if (typeof window === "undefined") return [];
@@ -92,4 +93,57 @@ export function deleteCalendarNote(id: string): CalendarNote[] {
   const notes = loadCalendarNotes().filter((n) => n.id !== id);
   saveCalendarNotes(notes);
   return notes;
+}
+
+export function loadArchivedPeriods(): ArchivedPeriod[] {
+  if (typeof window === "undefined") return [];
+  const raw = window.localStorage.getItem(ARCHIVED_PERIODS_STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as ArchivedPeriod[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveArchivedPeriods(periods: ArchivedPeriod[]): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(ARCHIVED_PERIODS_STORAGE_KEY, JSON.stringify(periods));
+}
+
+// Dönemi Kapat: aktif harcamaları silmeden arşivler, aktif listeyi boşaltır.
+// Başlangıç tarihi = önceki dönemin bitişinden bir gün sonrası (önceki dönem
+// yoksa aktif harcamaların en erkeni); bitiş tarihi = bugün.
+export function closePeriod(currentExpenses: Expense[]): {
+  archivedPeriods: ArchivedPeriod[];
+  expenses: Expense[];
+} {
+  const archivedPeriods = loadArchivedPeriods();
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  const lastPeriod = archivedPeriods[archivedPeriods.length - 1];
+  let startDate: string;
+  if (lastPeriod) {
+    const nextDay = new Date(lastPeriod.endDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    startDate = nextDay.toISOString().slice(0, 10);
+  } else if (currentExpenses.length > 0) {
+    startDate = currentExpenses.reduce((min, e) => (e.date < min ? e.date : min), currentExpenses[0].date);
+  } else {
+    startDate = todayIso;
+  }
+
+  const newPeriod: ArchivedPeriod = {
+    id: crypto.randomUUID(),
+    startDate,
+    endDate: todayIso,
+    createdAt: new Date().toISOString(),
+    expenses: currentExpenses,
+  };
+
+  const updatedPeriods = [...archivedPeriods, newPeriod];
+  saveArchivedPeriods(updatedPeriods);
+  saveExpenses([]);
+
+  return { archivedPeriods: updatedPeriods, expenses: [] };
 }

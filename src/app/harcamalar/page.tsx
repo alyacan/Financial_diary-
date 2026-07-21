@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
@@ -10,14 +11,44 @@ function formatTRY(value: number): string {
   return value.toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
 }
 
+function formatDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split("-");
+  return `${d}.${m}.${y}`;
+}
+
 export default function HarcamalarPage() {
-  const { expenses, handleAddExpense, handleDeleteExpense, handleImportExpenses, totalExpenses } = useExpenseData();
+  const {
+    expenses,
+    handleAddExpense,
+    handleDeleteExpense,
+    handleImportExpenses,
+    totalExpenses,
+    archivedPeriods,
+    handleClosePeriod,
+  } = useExpenseData();
+
+  function onClosePeriod() {
+    if (expenses.length === 0) return;
+    const confirmed = window.confirm(
+      "Mevcut dönemi kapatmak istediğine emin misin? Harcamaların silinmeyecek, arşive taşınacak ve ana ekran yeni dönem için temizlenecek."
+    );
+    if (confirmed) handleClosePeriod();
+  }
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
-      <header>
-        <h1 className="text-2xl font-bold">Harcama Analizi</h1>
-        <p className="text-sm text-zinc-500">Kategori bazlı harcama takibi</p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Harcama Analizi</h1>
+          <p className="text-sm text-zinc-500">Kategori bazlı harcama takibi</p>
+        </div>
+        <button
+          onClick={onClosePeriod}
+          disabled={expenses.length === 0}
+          className="rounded border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:hover:bg-zinc-900"
+        >
+          📁 Dönemi Kapat / Klasörle
+        </button>
       </header>
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -38,6 +69,29 @@ export default function HarcamalarPage() {
         <h2 className="mb-2 text-lg font-semibold">Harcamalar</h2>
         <ExpenseTable expenses={expenses} onDelete={handleDeleteExpense} />
       </section>
+
+      {archivedPeriods.length > 0 && (
+        <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <h2 className="mb-2 text-lg font-semibold">Arşivlenen Dönemler</h2>
+          <ul className="flex flex-col gap-2">
+            {[...archivedPeriods].reverse().map((period) => (
+              <li key={period.id}>
+                <Link
+                  href={`/harcamalar/donem/${period.id}`}
+                  className="flex items-center justify-between rounded border border-zinc-200 p-3 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
+                >
+                  <span className="font-medium">
+                    {formatDate(period.startDate)} - {formatDate(period.endDate)}
+                  </span>
+                  <span className="text-zinc-500">
+                    {period.expenses.length} harcama · {formatTRY(period.expenses.reduce((sum, e) => sum + e.amount, 0))}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
