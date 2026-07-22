@@ -1,10 +1,11 @@
-import { ArchivedPeriod, CalendarNote, Expense, PortfolioSnapshot, Transaction } from "./types";
+import { ArchivedPeriod, CalendarNote, CategoryBudget, Expense, PortfolioSnapshot, Transaction } from "./types";
 
 const STORAGE_KEY = "financial-diary-transactions";
 const EXPENSES_STORAGE_KEY = "financial-diary-expenses";
 const CALENDAR_STORAGE_KEY = "financial-diary-calendar-notes";
 const ARCHIVED_PERIODS_STORAGE_KEY = "financial-diary-archived-periods";
 const PORTFOLIO_SNAPSHOTS_STORAGE_KEY = "financial-diary-portfolio-snapshots";
+const BUDGETS_STORAGE_KEY = "financial-diary-category-budgets";
 const MAX_PORTFOLIO_SNAPSHOTS = 90;
 
 export function loadTransactions(): Transaction[] {
@@ -176,5 +177,33 @@ export function recordPortfolioSnapshot(value: number): PortfolioSnapshot[] {
     .sort((a, b) => (a.date < b.date ? -1 : 1))
     .slice(-MAX_PORTFOLIO_SNAPSHOTS);
   window.localStorage.setItem(PORTFOLIO_SNAPSHOTS_STORAGE_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+export function loadCategoryBudgets(): CategoryBudget[] {
+  if (typeof window === "undefined") return [];
+  const raw = window.localStorage.getItem(BUDGETS_STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as CategoryBudget[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCategoryBudget(category: string, monthlyGoal: number): CategoryBudget[] {
+  const budgets = loadCategoryBudgets().filter((b) => b.category !== category);
+  const updated = [...budgets, { category, monthlyGoal }];
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(BUDGETS_STORAGE_KEY, JSON.stringify(updated));
+  }
+  return updated;
+}
+
+export function deleteCategoryBudget(category: string): CategoryBudget[] {
+  const updated = loadCategoryBudgets().filter((b) => b.category !== category);
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(BUDGETS_STORAGE_KEY, JSON.stringify(updated));
+  }
   return updated;
 }

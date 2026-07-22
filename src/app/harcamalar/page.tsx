@@ -5,6 +5,7 @@ import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
 import ExpenseHeatmapCalendar from "@/components/ExpenseHeatmapCalendar";
+import BudgetGoals from "@/components/BudgetGoals";
 import StatementUpload from "@/components/StatementUpload";
 import { useExpenseData } from "@/hooks/useExpenseData";
 
@@ -26,6 +27,10 @@ export default function HarcamalarPage() {
     totalExpenses,
     archivedPeriods,
     handleClosePeriod,
+    budgets,
+    budgetProgress,
+    handleSaveBudget,
+    handleDeleteBudget,
   } = useExpenseData();
 
   function onClosePeriod() {
@@ -70,6 +75,14 @@ export default function HarcamalarPage() {
           harcamalarını görebilirsin.
         </p>
         <ExpenseHeatmapCalendar expenses={expenses} />
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="text-lg font-semibold">Hedef Bazlı Bütçe</h2>
+        <p className="mb-3 text-xs text-zinc-500">
+          Kategori başına aylık bir hedef belirle; bu ayki harcaman hedefe göre ve geçen aya göre karşılaştırılsın.
+        </p>
+        <BudgetGoals budgets={budgets} progress={budgetProgress} onSave={handleSaveBudget} onDelete={handleDeleteBudget} />
       </section>
 
       <StatementUpload existingExpenses={expenses} onImport={handleImportExpenses} />

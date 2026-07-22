@@ -1,17 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArchivedPeriod, Expense } from "@/lib/types";
-import { addExpense, addExpenses, closePeriod, deleteExpense, loadArchivedPeriods, loadExpenses } from "@/lib/storage";
+import { ArchivedPeriod, CategoryBudget, Expense } from "@/lib/types";
+import {
+  addExpense,
+  addExpenses,
+  closePeriod,
+  deleteCategoryBudget,
+  deleteExpense,
+  loadArchivedPeriods,
+  loadCategoryBudgets,
+  loadExpenses,
+  saveCategoryBudget,
+} from "@/lib/storage";
+import { computeBudgetProgress } from "@/lib/budgetStats";
 
 export function useExpenseData() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [archivedPeriods, setArchivedPeriods] = useState<ArchivedPeriod[]>([]);
+  const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
 
   useEffect(() => {
     setExpenses(loadExpenses());
     setArchivedPeriods(loadArchivedPeriods());
+    setBudgets(loadCategoryBudgets());
   }, []);
+
+  function handleSaveBudget(category: string, monthlyGoal: number) {
+    setBudgets(saveCategoryBudget(category, monthlyGoal));
+  }
+
+  function handleDeleteBudget(category: string) {
+    setBudgets(deleteCategoryBudget(category));
+  }
 
   function handleAddExpense(e: Expense) {
     setExpenses(addExpense(e));
@@ -33,6 +54,11 @@ export function useExpenseData() {
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
+  // Bütçe hedefleri takvim ayına göre değerlendirilir, Dönemi Kapat sınırlarından
+  // bağımsızdır — bu yüzden aktif + arşivlenmiş tüm harcamalar birlikte kullanılır.
+  const allExpensesForBudget = [...expenses, ...archivedPeriods.flatMap((p) => p.expenses)];
+  const budgetProgress = computeBudgetProgress(allExpensesForBudget, budgets);
+
   return {
     expenses,
     handleAddExpense,
@@ -41,5 +67,9 @@ export function useExpenseData() {
     totalExpenses,
     archivedPeriods,
     handleClosePeriod,
+    budgets,
+    budgetProgress,
+    handleSaveBudget,
+    handleDeleteBudget,
   };
 }

@@ -94,6 +94,11 @@ export interface Expense {
   note?: string;
 }
 
+export interface CategoryBudget {
+  category: string;
+  monthlyGoal: number; // TL
+}
+
 export interface PortfolioSnapshot {
   date: string; // YYYY-MM-DD
   value: number; // o günkü toplam güncel portföy değeri (TRY)
