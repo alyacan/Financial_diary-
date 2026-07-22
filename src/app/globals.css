@@ -54,6 +54,23 @@
   --viz-sequential: #2a78d6;
 }
 
+/* Harcama yoğunluk takvimi: sequential (tek renk, açık→koyu = az→çok) ramp, 5 kademe.
+   Her kademenin okunabilir metin rengi de birlikte tanımlanır — koyu temada
+   anchor ters döndüğü için (az veri koyu yüzeye yakın, çok veri parlak) metin
+   rengi kademe numarasından değil, bu değişkenlerden okunur. */
+:root {
+  --heat-1: #b7d3f6;
+  --heat-fg-1: #171717;
+  --heat-2: #86b6ef;
+  --heat-fg-2: #171717;
+  --heat-3: #3987e5;
+  --heat-fg-3: #fff;
+  --heat-4: #1c5cab;
+  --heat-fg-4: #fff;
+  --heat-5: #0d366b;
+  --heat-fg-5: #fff;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --viz-surface: #1a1a19;
@@ -61,6 +78,16 @@
     --viz-muted: #898781;
     --viz-gridline: #2c2c2a;
     --viz-sequential: #3987e5;
+    --heat-1: #184f95;
+    --heat-fg-1: #fff;
+    --heat-2: #2a78d6;
+    --heat-fg-2: #fff;
+    --heat-3: #5598e7;
+    --heat-fg-3: #fff;
+    --heat-4: #86b6ef;
+    --heat-fg-4: #171717;
+    --heat-5: #b7d3f6;
+    --heat-fg-5: #171717;
   }
 }
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
+import ExpenseHeatmapCalendar from "@/components/ExpenseHeatmapCalendar";
 import StatementUpload from "@/components/StatementUpload";
 import { useExpenseData } from "@/hooks/useExpenseData";
 
@@ -59,6 +60,16 @@ export default function HarcamalarPage() {
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="mb-2 text-lg font-semibold">Kategori Dağılımı</h2>
         <ExpenseChart expenses={expenses} />
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="text-lg font-semibold">Harcama Yoğunluk Takvimi</h2>
+        <p className="mb-3 text-xs text-zinc-500">
+          Finansal Takvim&apos;den bağımsızdır — yalnızca bu dönemin geçmiş harcamalarını, günlere göre tutar
+          yoğunluğuyla (koyu = yüksek harcama, pastel = düşük harcama) gösterir. Bir güne tıklayarak o günün
+          harcamalarını görebilirsin.
+        </p>
+        <ExpenseHeatmapCalendar expenses={expenses} />
       </section>
 
       <StatementUpload existingExpenses={expenses} onImport={handleImportExpenses} />
