@@ -53,6 +53,13 @@ npm run dev
 
 http://localhost:3000 adresinden açın.
 
+## Son Yapılan Değişiklikler
+
+- **Ana Sayfa yeniden tasarlandı**: Claude Design'da hazırlanan bir mockup'a göre — sol menü (Sidebar), sıcak/terrakota oklch renk paleti, Manrope + Newsreader fontları. Güncel Değer/Toplam Yatırım/Toplam Harcama/Toplam Kâr-Zarar kartları, portföy dağılım donut grafiği, portföy değeri trend grafiği (bugünden itibaren gerçek günlük kayıt) ve gerçek verilere dayalı AI Analiz bandı eklendi.
+- **Harcamalar sayfasına Harcama Yoğunluk Takvimi eklendi**: Finansal Takvim'den tamamen bağımsız, sadece geçmiş harcama günlerini tutar yoğunluğuna göre (koyu = yüksek, pastel = düşük) renklendiren ayrı bir mini takvim.
+- **Site geneli yazı tipi Manrope'a çevrildi** (globals.css'te unutulmuş bir Arial kuralı bazı sayfalarda eskiyi eziyordu, düzeltildi).
+- **Profil avatarı eklendi**: Sol menüde, tarih kutusunun hemen üstünde.
+
 ## Vizyon / Yol Haritası (Henüz Yapılmadı)
 
 Bu bölümdeki özellikler projenin uzun vadeli hedefidir, MVP kapsamında değildir:
