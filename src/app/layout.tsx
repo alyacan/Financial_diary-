@@ -16,6 +16,9 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "Finansal Günlük",
   description: "Yatırım ve harcama takibi, AI destekli tarihsel analiz",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
