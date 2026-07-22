@@ -43,11 +43,14 @@ Yatırımlarını (altın, kripto, döviz) takip eden, otomatik kâr/zarar hesap
 npm install
 ```
 
-`.env.local` dosyası oluşturun:
+`.env.example` dosyasını `.env.local` olarak kopyalayıp kendi key'inizi girin:
+```bash
+cp .env.example .env.local
+```
 ```
 GEMINI_API_KEY=your_key_here
 ```
-Ücretsiz key: https://aistudio.google.com/apikey
+Ücretsiz key: https://aistudio.google.com/apikey. `.env.local` `.gitignore`'da olduğu için repo'ya asla eklenmez.
 
 ```bash
 npm run dev
