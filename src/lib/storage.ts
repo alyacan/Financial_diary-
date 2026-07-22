@@ -114,6 +114,21 @@ export function saveArchivedPeriods(periods: ArchivedPeriod[]): void {
   window.localStorage.setItem(ARCHIVED_PERIODS_STORAGE_KEY, JSON.stringify(periods));
 }
 
+export function deleteArchivedPeriod(id: string): ArchivedPeriod[] {
+  const updated = loadArchivedPeriods().filter((p) => p.id !== id);
+  saveArchivedPeriods(updated);
+  return updated;
+}
+
+export function updateArchivedPeriod(
+  id: string,
+  updates: Partial<Pick<ArchivedPeriod, "name" | "note" | "startDate" | "endDate">>
+): ArchivedPeriod[] {
+  const updated = loadArchivedPeriods().map((p) => (p.id === id ? { ...p, ...updates } : p));
+  saveArchivedPeriods(updated);
+  return updated;
+}
+
 // Dönemi Kapat: aktif harcamaları silmeden arşivler, aktif listeyi boşaltır.
 // Başlangıç tarihi = önceki dönemin bitişinden bir gün sonrası (önceki dönem
 // yoksa aktif harcamaların en erkeni); bitiş tarihi = bugün. Aynı gün içinde

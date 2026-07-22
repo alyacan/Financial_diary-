@@ -2,8 +2,9 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArchivedPeriod, ASSET_LABELS, Transaction } from "@/lib/types";
-import { loadArchivedPeriods, loadTransactions } from "@/lib/storage";
+import { deleteArchivedPeriod, loadArchivedPeriods, loadTransactions, updateArchivedPeriod } from "@/lib/storage";
 import { computePeriodStats, transactionsInPeriod } from "@/lib/periodStats";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
@@ -20,9 +21,15 @@ function formatDate(isoDate: string): string {
 
 export default function ArchivedPeriodPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const [allPeriods, setAllPeriods] = useState<ArchivedPeriod[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [startInput, setStartInput] = useState("");
+  const [endInput, setEndInput] = useState("");
+  const [noteInput, setNoteInput] = useState("");
 
   useEffect(() => {
     setAllPeriods(loadArchivedPeriods());
@@ -31,6 +38,50 @@ export default function ArchivedPeriodPage({ params }: { params: Promise<{ id: s
   }, []);
 
   const period = allPeriods.find((p) => p.id === id);
+
+  useEffect(() => {
+    if (period) setNoteInput(period.note ?? "");
+  }, [period]);
+
+  function startEdit() {
+    if (!period) return;
+    setNameInput(period.name ?? "");
+    setStartInput(period.startDate);
+    setEndInput(period.endDate);
+    setEditing(true);
+  }
+
+  function saveEdit() {
+    if (!period) return;
+    if (startInput > endInput) {
+      window.alert("Başlangıç tarihi, bitiş tarihinden sonra olamaz.");
+      return;
+    }
+    setAllPeriods(
+      updateArchivedPeriod(period.id, {
+        name: nameInput.trim() ? nameInput.trim() : undefined,
+        startDate: startInput,
+        endDate: endInput,
+      })
+    );
+    setEditing(false);
+  }
+
+  function saveNote() {
+    if (!period) return;
+    setAllPeriods(updateArchivedPeriod(period.id, { note: noteInput.trim() ? noteInput.trim() : undefined }));
+  }
+
+  function handleDeletePeriod() {
+    if (!period) return;
+    const confirmed = window.confirm(
+      "Bu arşivlenmiş dönemi tamamen silmek istediğine emin misin? Bu işlem geri alınamaz."
+    );
+    if (confirmed) {
+      deleteArchivedPeriod(period.id);
+      router.push("/harcamalar");
+    }
+  }
 
   if (!loaded) return null;
 
@@ -51,14 +102,88 @@ export default function ArchivedPeriodPage({ params }: { params: Promise<{ id: s
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
       <header className="flex flex-col gap-1">
-        <Link href="/harcamalar" className="text-sm text-zinc-500 hover:underline">
-          ← Harcamalar
-        </Link>
-        <h1 className="text-2xl font-bold">
-          {formatDate(period.startDate)} - {formatDate(period.endDate)}
-        </h1>
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/harcamalar" className="text-sm text-zinc-500 hover:underline">
+            ← Harcamalar
+          </Link>
+          <div className="flex gap-2">
+            <button onClick={startEdit} className="text-sm text-zinc-500 hover:underline">
+              ✏️ Düzenle
+            </button>
+            <button onClick={handleDeletePeriod} className="text-sm text-red-600 hover:underline">
+              🗑️ Sil
+            </button>
+          </div>
+        </div>
+
+        {editing ? (
+          <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 p-3 dark:border-zinc-700">
+            <label className="flex flex-col gap-1 text-xs text-zinc-500">
+              İsim (opsiyonel)
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="Örn: Temmuz ayı"
+                className="rounded border border-zinc-300 p-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              />
+            </label>
+            <div className="flex gap-2">
+              <label className="flex flex-1 flex-col gap-1 text-xs text-zinc-500">
+                Başlangıç
+                <input
+                  type="date"
+                  value={startInput}
+                  onChange={(e) => setStartInput(e.target.value)}
+                  className="rounded border border-zinc-300 p-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                />
+              </label>
+              <label className="flex flex-1 flex-col gap-1 text-xs text-zinc-500">
+                Bitiş
+                <input
+                  type="date"
+                  value={endInput}
+                  onChange={(e) => setEndInput(e.target.value)}
+                  className="rounded border border-zinc-300 p-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                />
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={saveEdit} className="rounded bg-zinc-900 px-3 py-1 text-sm text-white dark:bg-zinc-100 dark:text-black">
+                Kaydet
+              </button>
+              <button onClick={() => setEditing(false)} className="rounded border border-zinc-300 px-3 py-1 text-sm dark:border-zinc-700">
+                Vazgeç
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold">
+              {period.name ? period.name : `${formatDate(period.startDate)} - ${formatDate(period.endDate)}`}
+            </h1>
+            {period.name && (
+              <p className="text-xs text-zinc-400">
+                {formatDate(period.startDate)} - {formatDate(period.endDate)}
+              </p>
+            )}
+          </>
+        )}
         <p className="text-sm text-zinc-500">Arşivlenen dönem detayı</p>
       </header>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="mb-2 text-lg font-semibold">Not</h2>
+        <p className="mb-2 text-xs text-zinc-400">Bu döneme özel serbest bir not — sadece bu dönem için geçerlidir.</p>
+        <textarea
+          value={noteInput}
+          onChange={(e) => setNoteInput(e.target.value)}
+          onBlur={saveNote}
+          rows={3}
+          placeholder="Bu dönemle ilgili bir not ekle..."
+          className="w-full rounded border border-zinc-300 p-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        />
+      </section>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">

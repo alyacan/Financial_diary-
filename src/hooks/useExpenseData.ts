@@ -6,12 +6,14 @@ import {
   addExpense,
   addExpenses,
   closePeriod,
+  deleteArchivedPeriod,
   deleteCategoryBudget,
   deleteExpense,
   loadArchivedPeriods,
   loadCategoryBudgets,
   loadExpenses,
   saveCategoryBudget,
+  updateArchivedPeriod,
 } from "@/lib/storage";
 import { computeBudgetProgress } from "@/lib/budgetStats";
 
@@ -52,6 +54,17 @@ export function useExpenseData() {
     setExpenses(result.expenses);
   }
 
+  function handleDeleteArchivedPeriod(id: string) {
+    setArchivedPeriods(deleteArchivedPeriod(id));
+  }
+
+  function handleUpdateArchivedPeriod(
+    id: string,
+    updates: Partial<Pick<ArchivedPeriod, "name" | "note" | "startDate" | "endDate">>
+  ) {
+    setArchivedPeriods(updateArchivedPeriod(id, updates));
+  }
+
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   // Bütçe hedefleri takvim ayına göre değerlendirilir, Dönemi Kapat sınırlarından
@@ -67,6 +80,8 @@ export function useExpenseData() {
     totalExpenses,
     archivedPeriods,
     handleClosePeriod,
+    handleDeleteArchivedPeriod,
+    handleUpdateArchivedPeriod,
     budgets,
     budgetProgress,
     handleSaveBudget,

@@ -1,21 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseChart from "@/components/ExpenseChart";
 import ExpenseTable from "@/components/ExpenseTable";
 import ExpenseHeatmapCalendar from "@/components/ExpenseHeatmapCalendar";
 import BudgetGoals from "@/components/BudgetGoals";
+import ArchivedPeriodCard from "@/components/ArchivedPeriodCard";
 import StatementUpload from "@/components/StatementUpload";
 import { useExpenseData } from "@/hooks/useExpenseData";
 
 function formatTRY(value: number): string {
   return value.toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
-}
-
-function formatDate(isoDate: string): string {
-  const [y, m, d] = isoDate.split("-");
-  return `${d}.${m}.${y}`;
 }
 
 export default function HarcamalarPage() {
@@ -27,6 +22,8 @@ export default function HarcamalarPage() {
     totalExpenses,
     archivedPeriods,
     handleClosePeriod,
+    handleDeleteArchivedPeriod,
+    handleUpdateArchivedPeriod,
     budgets,
     budgetProgress,
     handleSaveBudget,
@@ -99,19 +96,12 @@ export default function HarcamalarPage() {
           <h2 className="mb-3 text-lg font-semibold">Arşivlenen Dönemler ({archivedPeriods.length})</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {[...archivedPeriods].reverse().map((period) => (
-              <Link
+              <ArchivedPeriodCard
                 key={period.id}
-                href={`/harcamalar/donem/${period.id}`}
-                className="flex flex-col items-center gap-1 rounded-lg border border-zinc-200 p-3 text-center hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:border-zinc-600 dark:hover:bg-zinc-900"
-              >
-                <span className="text-4xl">📁</span>
-                <span className="text-sm font-medium leading-tight">
-                  {formatDate(period.startDate)} - {formatDate(period.endDate)}
-                </span>
-                <span className="text-xs text-zinc-500">
-                  {period.expenses.length} harcama · {formatTRY(period.expenses.reduce((sum, e) => sum + e.amount, 0))}
-                </span>
-              </Link>
+                period={period}
+                onDelete={handleDeleteArchivedPeriod}
+                onUpdate={handleUpdateArchivedPeriod}
+              />
             ))}
           </div>
         </section>

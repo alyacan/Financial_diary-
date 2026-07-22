@@ -114,10 +114,12 @@ export interface CalendarNote {
 // arşivler, ana ekran yeni dönem için temizlenir.
 export interface ArchivedPeriod {
   id: string;
+  name?: string; // kullanıcı tarafından verilmiş özel isim (yoksa tarih aralığı gösterilir)
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
   createdAt: string; // ISO timestamp — klasörleme anı
   expenses: Expense[];
+  note?: string; // döneme özel serbest not
 }
 
 export const RECURRING_CALENDAR_INFO = [
