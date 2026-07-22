@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Transaction, GOLD_SUBTYPES } from "@/lib/types";
 import { addTransaction, deleteTransaction, loadTransactions } from "@/lib/storage";
-import { fetchLivePrices, getManualPrice, setManualPrice } from "@/lib/prices";
+import { fetchLivePrices, getManualPrice, setManualPrice, getFundMetadata, setFundMetadata, FundMetadata } from "@/lib/prices";
 import { calculatePositions, calculateTransactionProfits, priceKey, PriceMap } from "@/lib/calculations";
 
 // Ons altından otomatik çekilen "gram" dışındaki fiziki altın türleri: kuyumcu primi/likidite
@@ -20,6 +20,9 @@ export function useInvestments() {
   const [prices, setPrices] = useState<PriceMap>({});
   const [manualGoldInputs, setManualGoldInputs] = useState<Record<string, string>>({});
   const [manualFundInputs, setManualFundInputs] = useState<Record<string, string>>({});
+  const [manualFundReturnInputs, setManualFundReturnInputs] = useState<Record<string, string>>({});
+  const [manualFundRiskInputs, setManualFundRiskInputs] = useState<Record<string, string>>({});
+  const [fundMetadata, setFundMetadataState] = useState<Record<string, FundMetadata>>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
 
   useEffect(() => {
@@ -34,11 +37,21 @@ export function useInvestments() {
     setManualGoldInputs(initialGold);
 
     const initialFund: Record<string, string> = {};
+    const initialFundReturn: Record<string, string> = {};
+    const initialFundRisk: Record<string, string> = {};
+    const initialFundMetadata: Record<string, FundMetadata> = {};
     for (const code of new Set(loaded.filter((t) => t.assetType === "fund").map((t) => t.subType))) {
       const saved = getManualPrice(priceKey("fund", code));
       if (saved) initialFund[code] = saved.toString();
+      const meta = getFundMetadata(code);
+      initialFundMetadata[code] = meta;
+      if (meta.annualReturnPercent !== undefined) initialFundReturn[code] = meta.annualReturnPercent.toString();
+      if (meta.riskLevel !== undefined) initialFundRisk[code] = meta.riskLevel.toString();
     }
     setManualFundInputs(initialFund);
+    setManualFundReturnInputs(initialFundReturn);
+    setManualFundRiskInputs(initialFundRisk);
+    setFundMetadataState(initialFundMetadata);
   }, []);
 
   function manualPrices(txs: Transaction[]): PriceMap {
@@ -90,6 +103,17 @@ export function useInvestments() {
     setPrices((prev) => ({ ...prev, [priceKey("fund", fundCode)]: value }));
   }
 
+  function handleManualFundMetadataSave(fundCode: string) {
+    const returnRaw = manualFundReturnInputs[fundCode] ?? "";
+    const riskRaw = manualFundRiskInputs[fundCode] ?? "";
+    const metadata: FundMetadata = {
+      annualReturnPercent: returnRaw !== "" ? parseFloat(returnRaw) : undefined,
+      riskLevel: riskRaw !== "" ? parseInt(riskRaw, 10) : undefined,
+    };
+    setFundMetadata(fundCode, metadata);
+    setFundMetadataState((prev) => ({ ...prev, [fundCode]: metadata }));
+  }
+
   const positions = calculatePositions(transactions, prices);
   const rows = calculateTransactionProfits(transactions, prices);
   const totalInvested = positions.reduce((sum, p) => sum + p.totalInvested, 0);
@@ -121,6 +145,11 @@ export function useInvestments() {
     setManualGoldInputs,
     manualFundInputs,
     setManualFundInputs,
+    manualFundReturnInputs,
+    setManualFundReturnInputs,
+    manualFundRiskInputs,
+    setManualFundRiskInputs,
+    fundMetadata,
     distinctFundCodes,
     loadingPrices,
     refreshPrices,
@@ -128,6 +157,7 @@ export function useInvestments() {
     handleDelete,
     handleManualGoldSave,
     handleManualFundSave,
+    handleManualFundMetadataSave,
     positions,
     rows,
     totalInvested,

@@ -13,6 +13,7 @@ Yatırımlarını (altın, kripto, döviz) takip eden, otomatik kâr/zarar hesap
 - **Otomatik kâr/zarar hesaplama**: Ortalama maliyet, toplam yatırım, güncel değer, işlem bazlı ve toplam kâr/zarar (yüzde dahil). Banka/Vadeli Hesap/Mevduat/Nakit için kâr/zarar hesaplanmaz — bunlar sadece portföydeki bakiye payını gösterir.
 - **Canlı fiyatlar**: Kripto (CoinGecko), döviz (Frankfurter) ve gram altın (uluslararası ons altın vadeli işlem fiyatı, Yahoo Finance + USD/TRY kuru ile hesaplanır — kuyumcu satış fiyatından işçilik/prim farkı nedeniyle sapabilir, referans niteliğindedir) otomatik çekilir. Çeyrek/Cumhuriyet altın ve **Fon (TEFAS kodu bazında)** için manuel güncel fiyat girişi var — TEFAS otomatik veri çekmeye karşı ciddi bot koruması (F5/Shape Security) kullandığı için canlı entegrasyon denenmedi; kullanıcı TEFAS linkine tıklayıp gerçek fiyatı görüp elle girer, gerçek kâr/zarar hesabı bu şekilde çalışır. Hisse için henüz fiyat girişi yok.
 - **Portföy dağılım grafiği**: Varlık türüne göre yatay çubuk grafik (dataviz iyi pratiklerine uygun — çakışan etiket yok, küsüratsız kısa değerler). Ayrıca Fon kategorileri için yatırılan tutara göre ayrı bir dağılım listesi.
+- **Fon yıllık getiri/risk seviyesi**: TEFAS bu veriyi de otomatik çekmeye karşı korumalı olduğu için, güncel fiyat girişiyle aynı desende — fon kodu bazında yıllık getiri (%) ve risk seviyesi (1-7, TEFAS/SPK ölçeği) elle girilip Yatırımlar sayfasında rozetle gösterilir.
 - **AI destekli tarihsel olay analizi**: Her işlem için, o tarihteki önemli ekonomik/siyasi gelişmelerin kısa özeti; istenirse Gemini ile IMRaD formatında + SWOT analizi içeren detaylı rapora genişletilebilir. Model gerçek zamanlı internete erişemediği için yalnızca eğitim verisindeki bilgiye dayanır ve emin olmadığı durumları açıkça belirtir (uydurma kaynak vermez). **Bilinen sınır:** Model kendi eğitim verisi kapsamına çok yakın veya sonraki tarihler için ("bu ay yaptığım işlem gibi") dürüstçe bilgisi olmadığını söyler — bu bir hata değil, kasıtlı bir güvenlik davranışıdır. (Google Arama ile gerçek zamanlı erişim teknik olarak mümkün ama ücretsiz key'lerde kota dışı; faturalandırma açılırsa etkinleştirilebilir.)
 - **Harcama Analizi**: Kategori bazlı (Market, Yemek, Ulaşım, Eğlence, Spor, Eğitim, Kira, Faturalar, Sağlık, Diğer) manuel harcama girişi, toplam harcama özeti, kategori dağılım çubuk grafiği.
 - **Dönemi Kapat / Klasörle**: İstediğin an mevcut harcamaları silmeden arşivler, ana ekranı yeni dönem için temizler. Arşivlenen her dönem tarih aralığıyla listelenir; açınca kategori dağılımı, en büyük/tekrarlayan/beklenmeyen harcamalar (basit yaklaşımlarla), tüm harcama kayıtları ve o tarih aralığındaki yatırım işlemlerini gösterir. **AI Analiz Paketi**: Uygulama kendisi hiçbir AI API'sine bağlı değildir — "Prompt Oluştur" kısa bir sihirbazla (analiz türü, AI rolü, detay seviyesi, serbest odak metni) kişiye özel bir analiz promptu üretir; "Word (.docx) Oluştur" aynı döneme ait tüm veriyi + oluşturulan promptun bir kopyasını içeren bir Word dosyası indirir. Kullanıcı ikisini de istediği yapay zekâya (ChatGPT, Claude, Gemini vb.) kendisi yükler. Not: Bu pakette sadece harcama ve yatırım verisi analiz edilir — gelir/tasarruf takibi henüz yok.
@@ -59,12 +60,14 @@ http://localhost:3000 adresinden açın.
 - **Harcamalar sayfasına Harcama Yoğunluk Takvimi eklendi**: Finansal Takvim'den tamamen bağımsız, sadece geçmiş harcama günlerini tutar yoğunluğuna göre (koyu = yüksek, pastel = düşük) renklendiren ayrı bir mini takvim.
 - **Site geneli yazı tipi Manrope'a çevrildi** (globals.css'te unutulmuş bir Arial kuralı bazı sayfalarda eskiyi eziyordu, düzeltildi).
 - **Profil avatarı eklendi**: Sol menüde, tarih kutusunun hemen üstünde.
+- **Site ikonu (favicon) eklendi/düzeltildi**.
+- **Fon yıllık getiri/risk seviyesi gösterimi**: Fon kodu bazında elle girilen yıllık getiri (%) ve risk seviyesi (1-7), Yatırımlar sayfasında rozet olarak gösteriliyor.
 
 ## Vizyon / Yol Haritası (Henüz Yapılmadı)
 
 Bu bölümdeki özellikler projenin uzun vadeli hedefidir, MVP kapsamında değildir:
 
-- Hisse için manuel güncel fiyat girişi; Fon'un yıllık getiri/risk seviyesi gösterimi
+- Hisse için manuel güncel fiyat girişi
 - Hedef bazlı bütçe (kategori başına aylık hedef ve geçen aya göre karşılaştırma)
 - CSV/Excel formatında ekstre desteği (şu an sadece PDF)
 - TÜİK TÜFE, OPEC ve şirket bilanço/temettü tarihlerinin otomatikleştirilmesi (güvenilir ücretsiz kaynak henüz bulunamadı)

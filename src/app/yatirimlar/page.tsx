@@ -18,6 +18,11 @@ export default function YatirimlarPage() {
     setManualGoldInputs,
     manualFundInputs,
     setManualFundInputs,
+    manualFundReturnInputs,
+    setManualFundReturnInputs,
+    manualFundRiskInputs,
+    setManualFundRiskInputs,
+    fundMetadata,
     distinctFundCodes,
     loadingPrices,
     refreshPrices,
@@ -25,6 +30,7 @@ export default function YatirimlarPage() {
     handleDelete,
     handleManualGoldSave,
     handleManualFundSave,
+    handleManualFundMetadataSave,
     positions,
     rows,
     totalInvested,
@@ -115,27 +121,63 @@ export default function YatirimlarPage() {
         {distinctFundCodes.length > 0 && (
           <div className="flex flex-col gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-900">
             <p className="text-xs text-zinc-400">
-              Fon fiyatları TEFAS&apos;ın bot korumasından dolayı otomatik çekilemiyor — linke tıklayıp gerçek güncel fiyatı gördükten sonra elle gir.
+              Fon fiyatları TEFAS&apos;ın bot korumasından dolayı otomatik çekilemiyor — linke tıklayıp gerçek güncel fiyatı gördükten sonra elle gir. Aynı TEFAS sayfasında fonun yıllık getirisi ve risk değeri (1-7) de yer alır, istersen onları da aşağıya girebilirsin.
             </p>
-            <div className="flex flex-wrap gap-4">
-              {distinctFundCodes.map((code) => (
-                <label key={code} className="flex items-center gap-2 text-sm">
-                  <a href={tefasUrl(code)} target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-900 dark:hover:text-zinc-100">
-                    {code} ↗
-                  </a>
-                  Güncel Fiyat (TL):
-                  <input
-                    type="number"
-                    step="any"
-                    value={manualFundInputs[code] ?? ""}
-                    onChange={(e) => setManualFundInputs((prev) => ({ ...prev, [code]: e.target.value }))}
-                    className="w-28 rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                  <button onClick={() => handleManualFundSave(code)} className="rounded bg-zinc-900 px-3 py-1 text-white dark:bg-zinc-100 dark:text-black">
-                    Kaydet
-                  </button>
-                </label>
-              ))}
+            <div className="flex flex-col gap-3">
+              {distinctFundCodes.map((code) => {
+                const meta = fundMetadata[code] ?? {};
+                return (
+                  <div key={code} className="flex flex-col gap-2 rounded border border-zinc-100 p-2 dark:border-zinc-900">
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <a href={tefasUrl(code)} target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-900 dark:hover:text-zinc-100">
+                        {code} ↗
+                      </a>
+                      Güncel Fiyat (TL):
+                      <input
+                        type="number"
+                        step="any"
+                        value={manualFundInputs[code] ?? ""}
+                        onChange={(e) => setManualFundInputs((prev) => ({ ...prev, [code]: e.target.value }))}
+                        className="w-28 rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      />
+                      <button onClick={() => handleManualFundSave(code)} className="rounded bg-zinc-900 px-3 py-1 text-white dark:bg-zinc-100 dark:text-black">
+                        Kaydet
+                      </button>
+                      {(meta.annualReturnPercent !== undefined || meta.riskLevel !== undefined) && (
+                        <span className="text-xs text-zinc-500">
+                          {meta.annualReturnPercent !== undefined && `Yıllık Getiri: %${meta.annualReturnPercent}`}
+                          {meta.annualReturnPercent !== undefined && meta.riskLevel !== undefined && " · "}
+                          {meta.riskLevel !== undefined && `Risk: ${meta.riskLevel}/7`}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      Yıllık Getiri (%):
+                      <input
+                        type="number"
+                        step="any"
+                        value={manualFundReturnInputs[code] ?? ""}
+                        onChange={(e) => setManualFundReturnInputs((prev) => ({ ...prev, [code]: e.target.value }))}
+                        className="w-24 rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      />
+                      Risk Seviyesi (1-7):
+                      <select
+                        value={manualFundRiskInputs[code] ?? ""}
+                        onChange={(e) => setManualFundRiskInputs((prev) => ({ ...prev, [code]: e.target.value }))}
+                        className="rounded border border-zinc-300 p-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      >
+                        <option value="">—</option>
+                        {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                          <option key={n} value={n}>{n}</option>
+                        ))}
+                      </select>
+                      <button onClick={() => handleManualFundMetadataSave(code)} className="rounded bg-zinc-900 px-3 py-1 text-white dark:bg-zinc-100 dark:text-black">
+                        Kaydet
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
